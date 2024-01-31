@@ -3,7 +3,7 @@ import { Avatar, Typography } from "@material-tailwind/react";
 
 export function MessageCard({ img, name, message, action }) {
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div className="flex items-center justify-between gap-4 border-b-blue-gray-50 border-2 p-2">
       <div className="flex items-center gap-4">
         <Avatar
           src={img}
@@ -24,7 +24,10 @@ export function MessageCard({ img, name, message, action }) {
           </Typography>
         </div>
       </div>
-      {action}
+      <Typography className="text-xs font-bold text-blue-gray-800 p-3" style={{backgroundColor: '#e9f7fd', borderRadius: '12px'}}>
+        11:00 - 12/11/23
+      </Typography>
+      {/*{action}*/}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { Link, NavLink } from "react-router-dom";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import {PlusIcon, XMarkIcon} from "@heroicons/react/24/outline";
 import {
   Avatar,
   Button,
@@ -8,8 +8,9 @@ import {
   Typography,
 } from "@material-tailwind/react";
 import { useMaterialTailwindController, setOpenSidenav } from "@/context";
+import MainLogo from "@/images-svg/main-logo.jsx";
 
-export function Sidenav({ brandImg, brandName, routes }) {
+export function Sidenav({ brandImg, brandName, routes, setPage }) {
   const [controller, dispatch] = useMaterialTailwindController();
   const { sidenavColor, sidenavType, openSidenav } = controller;
   const sidenavTypes = {
@@ -32,9 +33,27 @@ export function Sidenav({ brandImg, brandName, routes }) {
             variant="h6"
             color={sidenavType === "dark" ? "white" : "blue-gray"}
           >
-            {brandName}
+            <MainLogo style={{ display: 'inline' }} />
           </Typography>
         </Link>
+        <div className="m-4">
+          <Button
+            variant={"text"}
+            color={'white'}
+            className="flex items-center gap-4 px-4 capitalize"
+            fullWidth
+            style={{backgroundColor: '#11afe4'}}
+            onClick={() => setPage('lista-mediadores')}
+          >
+            <PlusIcon strokeWidth={2.5} className="h-5 w-5 text-white" />
+            <Typography
+              color="inherit"
+              className="font-medium capitalize"
+            >
+              Nova mediação
+            </Typography>
+          </Button>
+        </div>
         <IconButton
           variant="text"
           color="white"
@@ -48,47 +67,44 @@ export function Sidenav({ brandImg, brandName, routes }) {
       </div>
       <div className="m-4">
         {routes.map(({ layout, title, pages }, key) => (
-          <ul key={key} className="mb-4 flex flex-col gap-1">
-            {title && (
-              <li className="mx-3.5 mt-4 mb-2">
-                <Typography
-                  variant="small"
-                  color={sidenavType === "dark" ? "white" : "blue-gray"}
-                  className="font-black uppercase opacity-75"
-                >
-                  {title}
-                </Typography>
-              </li>
-            )}
-            {pages.map(({ icon, name, path }) => (
-              <li key={name}>
-                <NavLink to={`/${layout}${path}`}>
-                  {({ isActive }) => (
-                    <Button
-                      variant={isActive ? "gradient" : "text"}
-                      color={
-                        isActive
-                          ? sidenavColor
-                          : sidenavType === "dark"
-                          ? "white"
-                          : "blue-gray"
-                      }
-                      className="flex items-center gap-4 px-4 capitalize"
-                      fullWidth
-                    >
-                      {icon}
-                      <Typography
-                        color="inherit"
-                        className="font-medium capitalize"
+          <>
+            {key > 0 && <hr/>}
+            <ul key={key} className="mb-4 flex flex-col gap-1">
+              {title && (
+                <li className="mx-3.5 mt-4 mb-2">
+                  <Typography
+                    variant="small"
+                    color={sidenavType === "dark" ? "white" : "blue-gray"}
+                    className="font-black uppercase opacity-75"
+                  >
+                    {title}
+                  </Typography>
+                </li>
+              )}
+              {pages.map(({ icon, name, path }) => (
+                <li key={name}>
+                  <NavLink to={`/${layout}${path}`}>
+                    {({ isActive }) => (
+                      <Button
+                        variant={isActive ? "gradient" : "text"}
+                        className="flex items-center gap-4 px-4 capitalize"
+                        fullWidth
+                        style={{color: isActive ? '#11afe4' : '#878787', background: 'none', boxShadow: 'none'}}
                       >
-                        {name}
-                      </Typography>
-                    </Button>
-                  )}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
+                        {icon}
+                        <Typography
+                          color="inherit"
+                          className="font-medium capitalize"
+                        >
+                          {name}
+                        </Typography>
+                      </Button>
+                    )}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </>
         ))}
       </div>
     </aside>

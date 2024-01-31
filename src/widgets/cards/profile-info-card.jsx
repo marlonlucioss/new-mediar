@@ -14,6 +14,7 @@ export function ProfileInfoCard({ title, description, details, action }) {
         shadow={false}
         floated={false}
         className="mx-0 mt-0 mb-4 flex items-center justify-between gap-4"
+        style={{    justifyContent: 'center'}}
       >
         <Typography variant="h6" color="blue-gray">
           {title}

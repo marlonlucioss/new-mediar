@@ -9,14 +9,21 @@ import {
 } from "@/widgets/layout";
 import routes from "@/routes";
 import { useMaterialTailwindController, setOpenConfigurator } from "@/context";
+import {JSX, useState} from "react";
+import ListaMediadores from "@/pages/dashboard/listaMediadores.jsx";
+import OverviewMediador from "@/pages/dashboard/overviewMediador.jsx";
+import ScheduleMediador from "@/pages/dashboard/scheduleMediador.jsx";
+import SuccessScheduling from "@/pages/dashboard/successScheduling.jsx";
 
 export function Dashboard() {
   const [controller, dispatch] = useMaterialTailwindController();
   const { sidenavType } = controller;
+  const [page, setPage] = useState(null);
 
   return (
-    <div className="min-h-screen bg-blue-gray-50/50">
+    <div className="min-h-screen bg-white">
       <Sidenav
+        setPage={setPage}
         routes={routes}
         brandImg={
           sidenavType === "dark" ? "/img/logo-ct.png" : "/img/logo-ct-dark.png"
@@ -34,15 +41,29 @@ export function Dashboard() {
         >
           <Cog6ToothIcon className="h-5 w-5" />
         </IconButton>
-        <Routes>
-          {routes.map(
-            ({ layout, pages }) =>
-              layout === "dashboard" &&
-              pages.map(({ path, element }) => (
-                <Route exact path={path} element={element} />
-              ))
-          )}
-        </Routes>
+        { !page && (
+          <Routes>
+            {routes.map(
+              ({ layout, pages }) =>
+                layout === "dashboard" &&
+                pages.map(({ path, element }) => (
+                  <Route exact path={path} element={element} />
+                ))
+            )}
+          </Routes>
+        )}
+        { page === 'lista-mediadores' && (
+          <ListaMediadores setPage={setPage} />
+        )}
+        { page === 'overview-mediadores' && (
+          <OverviewMediador setPage={setPage} />
+        )}
+        { page === 'schedule-mediador' && (
+          <ScheduleMediador setPage={setPage} />
+        )}
+        { page === 'sucesso-agendamento' && (
+          <SuccessScheduling />
+        )}
         <div className="text-blue-gray-600">
           <Footer />
         </div>
