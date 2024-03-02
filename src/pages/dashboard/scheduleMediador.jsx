@@ -221,7 +221,7 @@ export function ScheduleMediador({ setPage }) {
                   variant="small"
                   className="font-normal text-blue-gray-500"
                 >
-                  <ButtonGroup className="gap-1 p-1" style={{flexFlow: 'wrap', justifyContent: 'space-between'}}>
+                  <ButtonGroup className="gap-10 p-1" style={{flexFlow: 'wrap', justifyContent: 'space-between'}}>
                     { meses.map((mes) => {
                       return <Button disabled={mes.value < new Date().getMonth()} onClick={() => {
                         setDays(getDaysInMonth(mes.value))
