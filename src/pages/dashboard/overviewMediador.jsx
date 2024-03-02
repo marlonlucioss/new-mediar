@@ -29,8 +29,8 @@ import ComunicacoesMediador from "@/widgets/mediar/ComunicacoesMediador.jsx";
 
 export function OverviewMediador({ setPage }) {
   return (
-    <Card className='' style={{flexFlow: 'wrap'}}>
-      <Card className='w-4/6'>
+    <Card className='' style={{flexFlow: 'wrap', boxShadow: 'none'}}>
+      <Card className='w-4/6' style={{boxShadow: 'none'}}>
         <CardBody className="p-4">
           <div className="mb-10 flex items-center justify-between flex-wrap gap-6">
             <div className="flex items-center gap-6 justify-between w-full">
