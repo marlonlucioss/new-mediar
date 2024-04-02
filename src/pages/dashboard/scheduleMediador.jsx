@@ -244,7 +244,7 @@ export function ScheduleMediador({ setPage }) {
                   variant="small"
                   className="font-normal text-blue-gray-500"
                 >
-                  <ButtonGroup className="gap-10 p-1" style={{flexFlow: 'wrap', justifyContent: 'space-between'}}>
+                  <ButtonGroup className="gap-3 p-1" style={{flexFlow: 'wrap', justifyContent: 'space-between', columnGap: 'normal'}}>
                     { meses.map((mes) => {
                       return <Button disabled={mes.value < new Date().getMonth()} onClick={() => {
                         setDays(getDaysInMonth(mes.value))
@@ -274,7 +274,7 @@ export function ScheduleMediador({ setPage }) {
                 variant="small"
                 className="font-normal text-blue-gray-500"
               >
-                <ButtonGroup className="gap-1 p-1" style={{flexWrap: 'wrap'}}>
+                <ButtonGroup className="gap-1 p-1" style={{flexWrap: 'wrap', justifyContent: 'space-between', columnGap: 'normal'}}>
                   { days.map((day) => {
                     return <Button disabled={day.getDate() < new Date().getDate() && day.getMonth() === new Date().getMonth()} onClick={() => setSelectedDay(day.getDate())} className="rounded mediar360-bt" style={{width: '70px', backgroundColor: `${selectedDay === day.getDate() ? 'rgb(17, 175, 228)' : 'white'}`, color: `${selectedDay === day.getDate() ? 'white' : 'rgb(17, 175, 228)'}`, border: '1px solid rgb(17, 175, 228)'}}>{formatDateToDay(day)}</Button>
                   })}
@@ -329,7 +329,7 @@ export function ScheduleMediador({ setPage }) {
               className="flex items-center gap-4 px-4 capitalize"
               fullWidth
               style={{backgroundColor: '#11afe4', placeContent: 'center'}}
-              onClick={() => setPage('schedule-mediador')}
+              onClick={() => setPage('sucesso-agendamento')}
             >
               <Typography
                 color="inherit"

@@ -16,6 +16,8 @@ import {
 import { Home, Profile, Tables, Notifications } from "@/pages/dashboard";
 import { SignIn, SignUp } from "@/pages/auth";
 import {Calendario} from "@/pages/dashboard/calendario.jsx";
+import ProximasMediacoes from "@/pages/dashboard/proximas-mediacoes.jsx";
+import Agenda from "@/pages/dashboard/agenda.jsx";
 
 const icon = {
   className: "w-5 h-5 text-inherit",
@@ -35,7 +37,13 @@ export const routes = [
         icon: <FolderOpenIcon {...icon} />,
         name: "Meu 360",
         path: "/profile",
-        element: <Profile />,
+        element: <Agenda />,
+      },
+      {
+        icon: <FolderOpenIcon {...icon} />,
+        name: "Próximas mediações",
+        path: "/proximas-mediacoes",
+        element: <ProximasMediacoes />,
       },
       {
         icon: <UserIcon {...icon} />,

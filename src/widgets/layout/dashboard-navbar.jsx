@@ -35,40 +35,44 @@ export function DashboardNavbar() {
   return (
     <Navbar
       color={fixedNavbar ? "white" : "transparent"}
-      className={`rounded-xl transition-all ${
+      className={`transition-all border-blue-gray-50 border-b-2 pb-6 ${
         fixedNavbar
           ? "sticky top-4 z-40 py-3 shadow-md shadow-blue-gray-500/5"
-          : "px-0 py-1"
+          : "px-0 py-1 pb-6"
       }`}
       fullWidth
       blurred={fixedNavbar}
     >
       <div className="flex flex-col-reverse justify-between gap-6 md:flex-row md:items-center">
         <div className="capitalize">
-          <Breadcrumbs
-            className={`bg-transparent p-0 transition-all ${
-              fixedNavbar ? "mt-1" : ""
-            }`}
-          >
-            <Link to={`/${layout}`}>
-              <Typography
-                variant="small"
-                color="blue-gray"
-                className="font-normal opacity-50 transition-all hover:text-blue-500 hover:opacity-100"
-              >
-                {layout}
-              </Typography>
-            </Link>
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className="font-normal"
-            >
-              {page}
-            </Typography>
-          </Breadcrumbs>
-          <Typography variant="h6" color="blue-gray">
-            {page}
+          {/*<Breadcrumbs*/}
+          {/*  className={`bg-transparent p-0 transition-all ${*/}
+          {/*    fixedNavbar ? "mt-1" : ""*/}
+          {/*  }`}*/}
+          {/*>*/}
+          {/*  <Link to={`/${layout}`}>*/}
+          {/*    <Typography*/}
+          {/*      variant="small"*/}
+          {/*      color="blue-gray"*/}
+          {/*      className="font-normal opacity-50 transition-all hover:text-blue-500 hover:opacity-100"*/}
+          {/*    >*/}
+          {/*      {layout}*/}
+          {/*    </Typography>*/}
+          {/*  </Link>*/}
+          {/*  <Typography*/}
+          {/*    variant="small"*/}
+          {/*    color="blue-gray"*/}
+          {/*    className="font-normal"*/}
+          {/*  >*/}
+          {/*    {page}*/}
+          {/*  </Typography>*/}
+          {/*</Breadcrumbs>*/}
+          <Typography variant="h3" color="blue-gray">
+            Olá Andrea Maia!
+            {/*{page}*/}
+          </Typography>
+          <Typography variant="small" color="gray" className='normal-case'>
+            Você está na plataforma Mediar360. Tenha um excelente dia.
           </Typography>
         </div>
         <div className="flex items-center">
