@@ -15,7 +15,7 @@ export function Sidenav({ brandImg, brandName, routes, setPage }) {
   const { sidenavColor, sidenavType, openSidenav } = controller;
   const sidenavTypes = {
     dark: "bg-gradient-to-br from-gray-800 to-gray-900",
-    white: "bg-white shadow-sm",
+    white: "bg-gray-100 shadow-sm",
     transparent: "bg-transparent",
   };
 
@@ -23,7 +23,7 @@ export function Sidenav({ brandImg, brandName, routes, setPage }) {
     <aside
       className={`${sidenavTypes[sidenavType]} ${
         openSidenav ? "translate-x-0" : "-translate-x-80"
-      } fixed inset-0 z-50 my-4 ml-4 h-[calc(100vh-32px)] w-72 rounded-xl transition-transform duration-300 xl:translate-x-0 border border-blue-gray-100`}
+      } - fixed inset-0 z-50 h-[calc(100vh)] w-80 transition-transform duration-300 xl:translate-x-0`}
     >
       <div
         className={`relative`}
@@ -36,11 +36,11 @@ export function Sidenav({ brandImg, brandName, routes, setPage }) {
             <MainLogo style={{ display: 'inline' }} />
           </Typography>
         </Link>
-        <div className="m-4">
+        <div className="m-8">
           <Button
             variant={"text"}
             color={'white'}
-            className="flex items-center gap-4 px-4 capitalize"
+            className="flex items-center gap-4 px-4 capitalize w-56"
             fullWidth
             style={{backgroundColor: '#11afe4'}}
             onClick={() => setPage('lista-mediadores')}
