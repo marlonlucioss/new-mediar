@@ -5,13 +5,78 @@ import {
   Button,
   Typography,
 } from "@material-tailwind/react";
-import { Link } from "react-router-dom";
-
+import {Link, Navigate, useNavigate} from "react-router-dom";
+import axios from "axios";
+import { useForm } from "react-hook-form"
+import {useEffect, useState} from "react";
 
 export function SignIn() {
+  const navigate = useNavigate();
+  const [hasLogin, setHasLogin] = useState(false)
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm()
+
+  const onSubmitLogin = (data) => callLogin(data)
+
+  const onSubmitRegister = (data) => callRegister(data)
+
+  const callLogin = (data) => {
+    axios.post('http://localhost:3001/auth/signin', {
+      email: data.email,
+      password: data.password,
+    })
+      .then(function (response) {
+        // handle success
+        localStorage.setItem("mediar",JSON.stringify(response.data))
+        navigate("/dashboard/home");
+        console.log(response);
+      })
+      .catch(function (error) {
+        // handle error
+        console.log(error);
+      })
+      .finally(function () {
+        // always executed
+      });
+  }
+
+  const callRegister = () => {
+    const {email, password} = watch()
+    axios.post('http://localhost:3001/auth/signup', {
+      email,
+      name: 'Mediador',
+      role: 'mediador',
+      password})
+      .then(function (response) {
+        // handle success
+        localStorage.setItem("mediar",JSON.stringify(response.data))
+        navigate("/dashboard/home");
+        console.log(response);
+      })
+      .catch(function (error) {
+        // handle error
+        console.log(error);
+      })
+      .finally(function () {
+        // always executed
+      });
+  }
+
+  useEffect(() => {
+    const item = localStorage.getItem('mediar')
+    if (item) {
+      navigate("/dashboard/home");
+    }
+  }, [])
+
   return (
     <section className="flex gap-36">
-      <div className="w-full lg:w-6/12 mt-24">
+      {!hasLogin && <>
+        <div className="w-full lg:w-6/12 mt-24">
         <div className="text-center">
           <img
             src="/img/login-logo.svg"
@@ -31,7 +96,7 @@ export function SignIn() {
             margin: 'auto'
           }} className="text-lg font-normal">Acesse a plataforma Mediar360 inserindo suas credenciais abaixo.</Typography>
         </div>
-        <form className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
+        <form onSubmit={handleSubmit(onSubmitLogin)} className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
           <div className="mb-1 flex flex-col gap-6">
             <Input
               size="lg"
@@ -40,7 +105,9 @@ export function SignIn() {
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
+              {...register("email", { required: true })}
             />
+            {errors.email && <span className='text-red-600'>This field is required</span>}
             <Input
               type="password"
               size="lg"
@@ -49,7 +116,9 @@ export function SignIn() {
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
+              {...register("password", { required: true })}
             />
+            {errors.password && <span className='text-red-600'>This field is required</span>}
           </div>
           {/*<Checkbox*/}
           {/*  label={*/}
@@ -69,7 +138,7 @@ export function SignIn() {
           {/*  }*/}
           {/*  containerProps={{ className: "-ml-2.5" }}*/}
           {/*/>*/}
-          <Button className="mt-10" style={{color: 'white', backgroundColor: '#11AFE4'}} fullWidth>
+          <Button type='submit' className="mt-10" style={{color: 'white', backgroundColor: '#11AFE4'}} fullWidth>
             Entrar
           </Button>
           <div className="flex items-center text-center justify-center gap-2 mt-2">
@@ -77,10 +146,9 @@ export function SignIn() {
               ou
             </Typography>
           </div>
-          <Button className="mt-2" style={{color: '#11AFE4', backgroundColor: 'rgb(17 175 228 / 15%)'}} fullWidth>
+          <Button onClick={callRegister} type='button' className="mt-2" style={{color: '#11AFE4', backgroundColor: 'rgb(17 175 228 / 15%)'}} fullWidth>
             Cadastre-se
           </Button>
-
           <div className="flex items-center text-center justify-center gap-2 mt-20">
             {/*<Checkbox*/}
             {/*  label={*/}
@@ -135,7 +203,8 @@ export function SignIn() {
           className="object-cover"
         />
       </div>
-
+        </>
+      }
     </section>
   );
 }
