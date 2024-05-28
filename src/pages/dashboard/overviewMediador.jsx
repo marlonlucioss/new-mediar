@@ -27,7 +27,8 @@ import {PlusIcon} from "@heroicons/react/24/outline/index.js";
 import ResumoMediador from "@/widgets/mediar/ResumoMediador.jsx";
 import ComunicacoesMediador from "@/widgets/mediar/ComunicacoesMediador.jsx";
 
-export function OverviewMediador({ setPage }) {
+export function OverviewMediador({ setPage, data }) {
+  console.log(data)
   return (
     <Card className='' style={{flexFlow: 'wrap', boxShadow: 'none'}}>
       <Card className='w-4/6' style={{boxShadow: 'none'}}>
@@ -45,7 +46,7 @@ export function OverviewMediador({ setPage }) {
                 />
                 <div className="pt-8 pl-3">
                   <Typography variant="h5" color="blue-gray" className="mb-1">
-                    Andrea Maia
+                    {data.mediador.name}
                   </Typography>
                   <Typography
                     variant="small"

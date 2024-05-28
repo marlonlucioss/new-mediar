@@ -25,6 +25,7 @@ import {StarIcon} from "@heroicons/react/24/solid/index.js";
 import React, {useEffect, useState} from "react";
 import {PlusIcon} from "@heroicons/react/24/outline/index.js";
 import ResumoMediador from "@/widgets/mediar/ResumoMediador.jsx";
+import axios from "axios";
 
 const getDaysInMonth = (month) => {
   const date = new Date(new Date().getFullYear(), month, 1);
@@ -168,15 +169,52 @@ const horarios = [
   }
 ]
 
-export function ScheduleMediador({ setPage }) {
+export function ScheduleMediador({ setPage, setData, data }) {
   const [days, setDays] = useState([])
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
   const [selectedDay, setSelectedDay] = useState(new Date().getDate())
   const [selectedHour, setSelectedHour] = useState()
 
+  const selectDateTime = () => {
+    console.log(selectedMonth)
+    console.log(selectedDay)
+    console.log(selectedHour)
+  }
+
   useEffect(() => {
     setDays(getDaysInMonth(new Date().getMonth()))
   }, []);
+
+  const callCreateConciliation = () => {
+    selectDateTime()
+    const token = JSON.parse(localStorage.getItem('mediar')).token
+    axios.post('http://localhost:3001/conciliations', {
+      mediador: data.mediador.name,
+      mediando: JSON.parse(localStorage.getItem('mediar')).user.name,
+      criadoPor: JSON.parse(localStorage.getItem('mediar')).user.name,
+      horario: `${selectedHour[0]}${selectedHour[1]}:${selectedHour[2]}0 - 1${selectedHour[2] === '3' ? parseInt(selectedHour[1]) + 1 : selectedHour[1]}:${selectedHour[2] === '0' ? 3 : 0}0`,
+      tipoMediacao: 'Familiar',
+      status: 'agendada',
+      plataforma: 'web',
+      dataMediacao: `2024-${selectedMonth + 1}-${selectedDay}`,
+    }, {
+      headers: {
+        authorization: 'bearer ' + token
+      }
+    })
+      .then(function (response) {
+        // handle success
+        setPage('sucesso-agendamento')
+        console.log(response);
+      })
+      .catch(function (error) {
+        // handle error
+        console.log(error);
+      })
+      .finally(function () {
+        // always executed
+      });
+  }
 
   return (
     <Card className='' style={{flexFlow: 'wrap', boxShadow: 'none'}}>
@@ -329,7 +367,9 @@ export function ScheduleMediador({ setPage }) {
               className="flex items-center gap-4 px-4 capitalize"
               fullWidth
               style={{backgroundColor: '#11afe4', placeContent: 'center'}}
-              onClick={() => setPage('sucesso-agendamento')}
+              onClick={() => {
+                callCreateConciliation()
+              }}
             >
               <Typography
                 color="inherit"

@@ -19,6 +19,7 @@ export function Dashboard() {
   const [controller, dispatch] = useMaterialTailwindController();
   const { sidenavType } = controller;
   const [page, setPage] = useState(null);
+  const [data, setData] = useState({});
 
   return (
     <div className="min-h-screen bg-white">
@@ -53,16 +54,16 @@ export function Dashboard() {
           </Routes>
         )}
         { page === 'lista-mediadores' && (
-          <ListaMediadores setPage={setPage} />
+          <ListaMediadores setPage={setPage} setData={setData} data={data} />
         )}
         { page === 'overview-mediadores' && (
-          <OverviewMediador setPage={setPage} />
+          <OverviewMediador setPage={setPage} data={data}  />
         )}
         { page === 'schedule-mediador' && (
-          <ScheduleMediador setPage={setPage} />
+          <ScheduleMediador setPage={setPage} setData={setData} data={data} />
         )}
         { page === 'sucesso-agendamento' && (
-          <SuccessScheduling />
+          <SuccessScheduling setPage={setPage} />
         )}
         <div className="text-blue-gray-600">
           <Footer />

@@ -18,15 +18,24 @@ import {
   Cog6ToothIcon,
   PencilIcon,
 } from "@heroicons/react/24/solid";
-import { Link } from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import { ProfileInfoCard, MessageCard } from "@/widgets/cards";
 import {platformSettingsData, conversationsData, projectsData, ordersOverviewData} from "@/data";
 import {StarIcon} from "@heroicons/react/24/solid/index.js";
-import React from "react";
+import React, {useEffect} from "react";
 import SuccessIcon from "@/images-svg/success-mediation.jsx";
 import ResumoMediador from "@/widgets/mediar/ResumoMediador.jsx";
+import axios from "axios";
 
 export function SuccessSchedule({ setPage }) {
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    navigate("/dashboard/proximas-mediacoes")
+    setTimeout(() => setPage(null), 2000)
+  }, [setPage])
+
   return (
     <Card style={{flexFlow: 'wrap', boxShadow: 'none', }}>
       <Card className='w-4/6' style={{boxShadow: 'none'}}>

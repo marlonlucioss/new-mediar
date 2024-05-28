@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {
   Typography,
   Card,
@@ -23,7 +23,9 @@ import {
   statisticsCardsData,
   statisticsChartsData,
   projectsTableData,
-  ordersOverviewData, conversationsData,
+  ordersOverviewData,
+  profileOverviewData,
+  conversationsData,
 } from "@/data";
 import {CheckCircleIcon, ClockIcon, StarIcon} from "@heroicons/react/24/solid";
 import FullCalendar from '@fullcalendar/react'
@@ -32,6 +34,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import {InformationCircleIcon} from "@heroicons/react/24/outline/index.js";
+import axios from "axios";
 const events = [
   { title: 'Meeting', start: new Date() }
 ]
@@ -62,6 +65,12 @@ const handleEventClick = (selected) => {
 };
 export function Home() {
   const [currentEvents, setCurrentEvents] = useState([]);
+  const [nextConciliationList, setNextConciliationList] = useState([]);
+  const [conciliationStatistics, setConciliationStatistics] = useState({
+    canceled:0,
+    finished:0,
+    scheduled:0
+  });
   const [showAlerts, setShowAlerts] = React.useState({
     blue: true,
     green: true,
@@ -75,6 +84,45 @@ export function Home() {
     red: true,
   });
   const alerts = ["gray", "green", "orange", "red", "green"];
+
+  useEffect(() => {
+    const token = JSON.parse(localStorage.getItem('mediar')).token
+    axios.get('http://localhost:3001/conciliations/next', {
+      headers: {
+        authorization: 'bearer ' + token
+      }
+    })
+      .then(function (response) {
+        // handle success
+        console.log(response);
+        setNextConciliationList(response.data)
+      })
+      .catch(function (error) {
+        // handle error
+        console.log(error);
+      })
+      .finally(function () {
+        // always executed
+      });
+    axios.get('http://localhost:3001/conciliations/statistics', {
+      headers: {
+        authorization: 'bearer ' + token
+      }
+    })
+      .then(function (response) {
+        // handle success
+        console.log(response);
+        setConciliationStatistics(response.data)
+      })
+      .catch(function (error) {
+        // handle error
+        console.log(error);
+      })
+      .finally(function () {
+        // always executed
+      });
+  }, []);
+
   return (
     <div className="mt-12">
       <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
@@ -123,7 +171,7 @@ export function Home() {
                   color="blue-gray"
                   className="mb-1 font-semibold"
                 >
-                  Andrea Maia
+                  {JSON.parse(localStorage.getItem('mediar')).user.name}
                 </Typography>
                 <Typography className="text-xs font-normal text-blue-gray-400">
                   Mediador de família
@@ -146,7 +194,7 @@ export function Home() {
           </div>
           </CardHeader>
           <CardBody className="pt-0">
-            {ordersOverviewData.map(
+            {profileOverviewData.map(
               ({ icon, color, title, description }, key) => (
                 <div key={title} className="flex items-start gap-4 py-3 mr-7" style={{display: 'inline-grid', width: '40%'}}>
                   {/*<div*/}
@@ -204,7 +252,7 @@ export function Home() {
           </CardHeader>
           <CardBody className="pt-0">
             <ul className="flex flex-col gap-6">
-              {conversationsData.map((props) => (
+              {nextConciliationList.map((props) => (
                 <MessageCard
                   key={props.name}
                   {...props}
@@ -217,40 +265,40 @@ export function Home() {
           <Card className="mb-6" style={{backgroundColor: '#DBF5D2'}}>
             <CardBody className="text-center">
               <Typography variant="h4" color="blue-gray" className="mb-2">
-                11
+                {conciliationStatistics.finished}
               </Typography>
               <Typography color="blue-gray" className="font-bold text-blue-gray-800" textGradient>
                 Mediações Realizadas
               </Typography>
-              <Typography color="blue-gray" className="font-medium text-xs" textGradient>
-                Novembro 2023
-              </Typography>
+              {/*<Typography color="blue-gray" className="font-medium text-xs" textGradient>*/}
+              {/*  Novembro 2023*/}
+              {/*</Typography>*/}
             </CardBody>
           </Card>
           <Card className="mb-6" style={{backgroundColor: '#FFF7D9'}}>
             <CardBody className="text-center">
               <Typography variant="h4" color="blue-gray" className="mb-2">
-                8
+                {conciliationStatistics.scheduled}
               </Typography>
               <Typography color="blue-gray" className="font-bold text-blue-gray-800" textGradient>
                 Mediações Agendadas
               </Typography>
-              <Typography color="blue-gray" className="font-medium text-xs" textGradient>
-                Novembro 2023
-              </Typography>
+              {/*<Typography color="blue-gray" className="font-medium text-xs" textGradient>*/}
+              {/*  Novembro 2023*/}
+              {/*</Typography>*/}
             </CardBody>
           </Card>
           <Card className="" style={{backgroundColor: '#FFEDED'}}>
             <CardBody className="text-center">
               <Typography variant="h4" color="blue-gray" className="mb-2">
-                3
+                {conciliationStatistics.canceled}
               </Typography>
               <Typography color="blue-gray" className="font-bold text-blue-gray-800" textGradient>
                 Mediações Canceladas
               </Typography>
-              <Typography color="blue-gray" className="font-medium text-xs" textGradient>
-                Novembro 2023
-              </Typography>
+              {/*<Typography color="blue-gray" className="font-medium text-xs" textGradient>*/}
+              {/*  Novembro 2023*/}
+              {/*</Typography>*/}
             </CardBody>
           </Card>
         </Card>

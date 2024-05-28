@@ -22,14 +22,42 @@ import { Link } from "react-router-dom";
 import { ProfileInfoCard, MessageCard } from "@/widgets/cards";
 import {platformSettingsData, conversationsData, projectsData, ordersOverviewData} from "@/data";
 import {StarIcon} from "@heroicons/react/24/solid/index.js";
-import React from "react";
+import React, {useEffect, useState} from "react";
+import axios from "axios";
 
-export function ListaMediadores({ setPage }) {
+export function ListaMediadores({ setPage, setData, data }) {
+  const [usersList, setUsersList] = useState([])
+
+
+  const selectUser = (user) => {
+    setData({...data, mediador: user})
+    setPage('overview-mediadores')
+  }
+
+  useEffect(() => {
+    axios.get('http://localhost:3001/users', {
+      headers: {
+        authorization: 'bearer ' + JSON.parse(localStorage.getItem('mediar')).token
+      }
+    })
+      .then(function (response) {
+        // handle success
+        setUsersList(response.data);
+      })
+      .catch(function (error) {
+        // handle error
+        console.log(error);
+      })
+      .finally(function () {
+        // always executed
+      });
+  }, [])
+
   return (
     <Card className='w-full' style={{flexFlow: 'wrap', boxShadow: 'none'}}>
       <Card className='w-4/6 mt-6 gap-9' style={{flexFlow: 'wrap', boxShadow: 'none'}}>
-        { [1,2,3,4,5,6].map(() => (
-          <Card onClick={() => {setPage('overview-mediadores')}} className="mb-3" style={{cursor: 'pointer', display: 'inline-block', textAlign: 'center', height: '200px', width: '230px'}}>
+        { usersList.map((user) => (
+          <Card onClick={() => {selectUser(user)}} className="mb-3" style={{cursor: 'pointer', display: 'inline-block', textAlign: 'center', height: '200px', width: '230px'}}>
             <CardBody>
               <img style={{display: 'inline'}} src="/img/andrea-lista.png" alt=""/>
               <div>
@@ -38,7 +66,7 @@ export function ListaMediadores({ setPage }) {
                   color="blue-gray"
                   className="mb-1 font-semibold"
                 >
-                  Andrea Maia
+                  {user.name}
                 </Typography>
                 <Typography className="text-xs font-normal text-blue-gray-400">
                   Mediador de família

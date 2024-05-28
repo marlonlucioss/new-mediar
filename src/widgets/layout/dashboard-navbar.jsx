@@ -1,4 +1,4 @@
-import { useLocation, Link } from "react-router-dom";
+import {useLocation, Link, useNavigate} from "react-router-dom";
 import {
   Navbar,
   Typography,
@@ -18,7 +18,7 @@ import {
   BellIcon,
   ClockIcon,
   CreditCardIcon,
-  Bars3Icon,
+  Bars3Icon, TrashIcon,
 } from "@heroicons/react/24/solid";
 import {
   useMaterialTailwindController,
@@ -26,12 +26,19 @@ import {
   setOpenSidenav,
 } from "@/context";
 import React from "react";
+import axios from "axios";
 
 export function DashboardNavbar() {
+  const navigate = useNavigate();
   const [controller, dispatch] = useMaterialTailwindController();
   const { fixedNavbar, openSidenav } = controller;
   const { pathname } = useLocation();
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
+
+  const callLogout = () => {
+    localStorage.removeItem('mediar')
+    setTimeout(() => navigate("/auth/sign-in"), 1000)
+  }
 
   return (
     <Navbar
@@ -69,7 +76,7 @@ export function DashboardNavbar() {
           {/*  </Typography>*/}
           {/*</Breadcrumbs>*/}
           <Typography variant="h3" color="blue-gray">
-            Olá Andrea Maia!
+            Olá {JSON.parse(localStorage.getItem('mediar')).user.name}
             {/*{page}*/}
           </Typography>
           <Typography variant="small" color="gray" className='normal-case'>
@@ -271,6 +278,17 @@ export function DashboardNavbar() {
               </IconButton>
             </MenuHandler>
             <MenuList className="w-max border-0">
+              <MenuItem className="flex items-center gap-3">
+                <button onClick={callLogout}
+                  className="flex items-center gap-2 px-6 py-3 font-sans text-xs font-bold text-center text-gray-900 uppercase align-middle transition-all rounded-lg select-none disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none hover:bg-gray-900/10 active:bg-gray-900/20 w-full justify-between"
+                  type="button">
+                  Sair
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                       className="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3"></path>
+                  </svg>
+                </button>
+              </MenuItem>
               <MenuItem className="flex items-center gap-3">
                 <Avatar
                   src="https://demos.creative-tim.com/material-dashboard/assets/img/team-2.jpg"
