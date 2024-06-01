@@ -87,7 +87,7 @@ export function Home() {
 
   useEffect(() => {
     const token = JSON.parse(localStorage.getItem('mediar')).token
-    axios.get('http://localhost:3001/conciliations/next', {
+    axios.get('https://mediar360.com:3001/conciliations/next', {
       headers: {
         authorization: 'bearer ' + token
       }
@@ -104,7 +104,7 @@ export function Home() {
       .finally(function () {
         // always executed
       });
-    axios.get('http://localhost:3001/conciliations/statistics', {
+    axios.get('https://mediar360.com:3001/conciliations/statistics', {
       headers: {
         authorization: 'bearer ' + token
       }

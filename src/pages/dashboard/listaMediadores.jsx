@@ -35,7 +35,7 @@ export function ListaMediadores({ setPage, setData, data }) {
   }
 
   useEffect(() => {
-    axios.get('http://localhost:3001/users', {
+    axios.get('https://mediar360.com:3001/users', {
       headers: {
         authorization: 'bearer ' + JSON.parse(localStorage.getItem('mediar')).token
       }
