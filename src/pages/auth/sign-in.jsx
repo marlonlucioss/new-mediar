@@ -48,7 +48,7 @@ export function SignIn() {
     const {email, password} = watch()
     axios.post('http://localhost:3001/auth/signup', {
       email,
-      name: email,
+      name: 'Mediador ' + Math.floor(Math.random() * 999) + 1,
       role: 'mediador',
       password})
       .then(function (response) {
