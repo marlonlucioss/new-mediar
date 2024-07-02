@@ -2,8 +2,9 @@ import {
   Card,
   Input,
   Checkbox,
+  Option,
   Button,
-  Typography,
+  Typography, Select,
 } from "@material-tailwind/react";
 import {Link, Navigate, useNavigate} from "react-router-dom";
 import axios from "axios";
@@ -13,6 +14,8 @@ import {useEffect, useState} from "react";
 export function SignIn() {
   const navigate = useNavigate();
   const [hasLogin, setHasLogin] = useState(false)
+  const [displayRegister, setDisplayRegister] = useState(false)
+  const [atividade, setAtividade] = useState('')
   const {
     register,
     handleSubmit,
@@ -22,7 +25,7 @@ export function SignIn() {
 
   const onSubmitLogin = (data) => callLogin(data)
 
-  const onSubmitRegister = (data) => callRegister(data)
+  const onSubmitRegister = (data) => callRegister({...data, role: atividade})
 
   const callLogin = (data) => {
     axios.post('https://mediar360.com:3001/auth/signin', {
@@ -44,13 +47,22 @@ export function SignIn() {
       });
   }
 
-  const callRegister = () => {
-    const {email, password} = watch()
+  const callRegister = (data) => {
+    // console.log(data)
+    // cpfCnpj-
+    // email-
+    // nome-
+    // password-
+    // password_confirmation
+    // role-
+    // telefone-
     axios.post('https://mediar360.com:3001/auth/signup', {
-      email,
-      name: 'Mediador ' + Math.floor(Math.random() * 999) + 1,
-      role: 'mediador',
-      password})
+      email: data.email,
+      name: data.nome,
+      cpfCnpj: data.cpfCnpj,
+      telefone: data.telefone,
+      role: data.role,
+      password: data.password})
       .then(function (response) {
         // handle success
         localStorage.setItem("mediar",JSON.stringify(response.data))
@@ -146,7 +158,7 @@ export function SignIn() {
               ou
             </Typography>
           </div>
-          <Button onClick={callRegister} type='button' className="mt-2" style={{color: '#11AFE4', backgroundColor: 'rgb(17 175 228 / 15%)'}} fullWidth>
+          <Button onClick={() => setDisplayRegister(true)} type='button' className="mt-2" style={{color: '#11AFE4', backgroundColor: 'rgb(17 175 228 / 15%)'}} fullWidth>
             Cadastre-se
           </Button>
           <div className="flex items-center text-center justify-center gap-2 mt-20">
@@ -195,9 +207,167 @@ export function SignIn() {
           {/*  <Link to="/auth/sign-up" className="text-gray-900 ml-1">Create account</Link>*/}
           {/*</Typography>*/}
         </form>
-
       </div>
-      <div className="w-5/5 lg:block">
+      <div className="w-5/5 lg:block" style={{position: 'relative'}}>
+        { displayRegister && <div className='register-form' style={{
+          position: 'absolute',
+          backgroundColor: '#86c1d8cc',
+          width: '100%',
+          height: '100%',
+        }}>
+          <Typography variant="paragraph" color="" style={{
+            height: '48px',
+            top: '69px',
+            left: '8px',
+            fontSize: '14px',
+            fontWeight: '500',
+            color: '#828282',
+            lineHeight: '24px',
+            letterSpacing: '0px',
+            textAlign: 'center',
+            margin: 'auto'
+          }} className="text-lg font-normal">Bem vindo!</Typography>
+          <Typography variant="paragraph" color="" style={{width: '348px',
+            height: '48px',
+            top: '69px',
+            left: '8px',
+            fontSize: '14px',
+            fontWeight: '500',
+            color: '#828282',
+            lineHeight: '24px',
+            letterSpacing: '0px',
+            textAlign: 'center',
+            margin: 'auto'
+          }} className="text-lg font-normal">Acesse a plataforma Mediar360 inserindo suas informações abaixo.</Typography>
+          <form onSubmit={handleSubmit(onSubmitRegister)} className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
+            <div className="mb-1 flex flex-col gap-6">
+              <Input
+                size="lg"
+                // placeholder="Nome"
+                label="Nome completo"
+                className=" !border-t-blue-gray-200 focus:!border-t-gray-900 bg-white"
+                labelProps={{
+                  className: "before:content-none after:content-none",
+                }}
+                {...register("nome", { required: true })}
+              />
+              {errors.nome && <span className='text-red-600'>This field is required</span>}
+              <Input
+                size="lg"
+                // placeholder="exemplo@email.com"
+                label="Email"
+                className=" !border-t-blue-gray-200 focus:!border-t-gray-900 bg-white"
+                labelProps={{
+                  className: "before:content-none after:content-none",
+                }}
+                {...register("email", { required: true })}
+              />
+              {errors.email && <span className='text-red-600'>This field is required</span>}
+              <Input
+                size="lg"
+                // placeholder="(xx) xxxxx-xxxx"
+                label="Telefone"
+                className=" !border-t-blue-gray-200 focus:!border-t-gray-900 bg-white"
+                labelProps={{
+                  className: "before:content-none after:content-none",
+                }}
+                {...register("telefone", { required: true })}
+              />
+              {errors.telefone && <span className='text-red-600'>This field is required</span>}
+              <Select label="Selecione sua atividade" className='bg-white' value={atividade}
+                      onChange={(val) => setAtividade(val)}>
+                <Option value='mediador'>Mediador</Option>
+                <Option value='mediando'>Mediando</Option>
+                <Option value='empresa'>Empresa</Option>
+                <Option value='advogado'>Advogado</Option>
+              </Select>
+              {errors.atividade && <span className='text-red-600'>This field is required</span>}
+              <Input
+                size="lg"
+                // placeholder="xxx.xxx.xxx-xx"
+                label="CPF ou CNPJ"
+                className=" !border-t-blue-gray-200 focus:!border-t-gray-900 bg-white"
+                labelProps={{
+                  className: "before:content-none after:content-none",
+                }}
+                {...register("cpfCnpj", { required: true })}
+              />
+              {errors.cpfCnpj && <span className='text-red-600'>This field is required</span>}
+              {/*<Input*/}
+              {/*  size="lg"*/}
+              {/*  placeholder="Nome de usuário"*/}
+              {/*  className=" !border-t-blue-gray-200 focus:!border-t-gray-900 bg-white"*/}
+              {/*  labelProps={{*/}
+              {/*    className: "before:content-none after:content-none",*/}
+              {/*  }}*/}
+              {/*  {...register("atividade", { required: true })}*/}
+              {/*/>*/}
+              <Typography variant="paragraph" color="" style={{width: '348px',
+                top: '69px',
+                left: '8px',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#828282',
+                lineHeight: '24px',
+                letterSpacing: '0px',
+                textAlign: 'center',
+                margin: 'auto'
+              }} className="text-lg font-normal">Crie sua senha</Typography>
+              <Input
+                type="password"
+                size="lg"
+                placeholder="Senha"
+                className=" !border-t-blue-gray-200 focus:!border-t-gray-900 bg-white"
+                labelProps={{
+                  className: "before:content-none after:content-none",
+                }}
+                {...register("password", { required: true })}
+              />
+              {errors.password && <span className='text-red-600'>This field is required</span>}
+              <Typography variant="paragraph" color="" style={{width: '348px',
+                top: '69px',
+                left: '8px',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#828282',
+                lineHeight: '24px',
+                letterSpacing: '0px',
+                textAlign: 'center',
+                margin: 'auto'
+              }} className="text-lg font-normal">Repita a senha</Typography>
+              <Input
+                type="password"
+                size="lg"
+                placeholder="Senha"
+                className=" !border-t-blue-gray-200 focus:!border-t-gray-900 bg-white"
+                labelProps={{
+                  className: "before:content-none after:content-none",
+                }}
+                {...register("password_confirmation", { required: true })}
+              />
+              {errors.password && <span className='text-red-600'>This field is required</span>}
+            </div>
+            <Checkbox
+              label={
+                <Typography color="blue-gray" className="flex font-medium">
+                  I agree with the
+                  <Typography
+                    as="a"
+                    href="#"
+                    color="blue"
+                    className="font-medium transition-colors hover:text-blue-700"
+                  >
+                    &nbsp;terms and conditions
+                  </Typography>
+                  .
+                </Typography>
+              }
+            />
+            <Button type='submit' className="mt-10" style={{color: 'white', backgroundColor: '#11AFE4'}} fullWidth>
+              Cadastrar!
+            </Button>
+          </form>
+        </div> }
         <img
           src="/img/login-image.svg"
           className="object-cover"
