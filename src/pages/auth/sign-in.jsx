@@ -28,7 +28,7 @@ export function SignIn() {
   const onSubmitRegister = (data) => callRegister({...data, role: atividade})
 
   const callLogin = (data) => {
-    axios.post('https://mediar360.com:3001/auth/signin', {
+    axios.post('http://localhost:3001/auth/signin', {
       email: data.email,
       password: data.password,
     })
@@ -56,7 +56,7 @@ export function SignIn() {
     // password_confirmation
     // role-
     // telefone-
-    axios.post('https://mediar360.com:3001/auth/signup', {
+    axios.post('http://localhost:3001/auth/signup', {
       email: data.email,
       name: data.nome,
       cpfCnpj: data.cpfCnpj,

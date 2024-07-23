@@ -34,7 +34,7 @@ export function ProximasMediacoes({ setPage }) {
 
   useEffect(() => {
     const token = JSON.parse(localStorage.getItem('mediar')).token
-    axios.get('https://mediar360.com:3001/conciliations', {
+    axios.get('http://localhost:3001/conciliations', {
       headers: {
         authorization: 'bearer ' + token
       }
@@ -64,34 +64,34 @@ export function ProximasMediacoes({ setPage }) {
                 <h4 className="text-3xl font-normal leading-tight text-gray-800 dark:text-gray-100">Minhas Mediações</h4>
               </div>
               <div className='w-5/12'></div>
-              <div className="mt-6 md:mt-0 flex items-center">
-                <Button
-                  variant={"filled"}
-                  className="flex items-center gap-4 px-4 capitalize mr-3"
-                  style={{backgroundColor: '#fff', borderRadius: '100%', padding: '10px'}}
-                >
-                  <ChevronLeftIcon strokeWidth={2.5} className="h-5 w-5 text-gray-600" />
-                </Button>
-                <Typography
-                  color="inherit"
-                  className="font-medium mt-1 mx-4"
-                >
-                  Nov 15, 2023
-                </Typography>
-                {/*<Typography*/}
-                {/*  color="inherit"*/}
-                {/*  className="font-light"*/}
-                {/*>*/}
-                {/*  Hoje*/}
-                {/*</Typography>*/}
-                <Button
-                  variant={"filled"}
-                  className="flex items-center gap-4 px-4 capitalize ml-3"
-                  style={{backgroundColor: '#fff', borderRadius: '100%', padding: '10px'}}
-                >
-                  <ChevronRightIcon strokeWidth={2.5} className="h-5 w-5 text-gray-600" />
-                </Button>
-              </div>
+              {/*<div className="mt-6 md:mt-0 flex items-center">*/}
+              {/*  <Button*/}
+              {/*    variant={"filled"}*/}
+              {/*    className="flex items-center gap-4 px-4 capitalize mr-3"*/}
+              {/*    style={{backgroundColor: '#fff', borderRadius: '100%', padding: '10px'}}*/}
+              {/*  >*/}
+              {/*    <ChevronLeftIcon strokeWidth={2.5} className="h-5 w-5 text-gray-600" />*/}
+              {/*  </Button>*/}
+              {/*  <Typography*/}
+              {/*    color="inherit"*/}
+              {/*    className="font-medium mt-1 mx-4"*/}
+              {/*  >*/}
+              {/*    Nov 15, 2023*/}
+              {/*  </Typography>*/}
+              {/*  /!*<Typography*!/*/}
+              {/*  /!*  color="inherit"*!/*/}
+              {/*  /!*  className="font-light"*!/*/}
+              {/*  /!*>*!/*/}
+              {/*  /!*  Hoje*!/*/}
+              {/*  /!*</Typography>*!/*/}
+              {/*  <Button*/}
+              {/*    variant={"filled"}*/}
+              {/*    className="flex items-center gap-4 px-4 capitalize ml-3"*/}
+              {/*    style={{backgroundColor: '#fff', borderRadius: '100%', padding: '10px'}}*/}
+              {/*  >*/}
+              {/*    <ChevronRightIcon strokeWidth={2.5} className="h-5 w-5 text-gray-600" />*/}
+              {/*  </Button>*/}
+              {/*</div>*/}
               <div className="mt-6 md:mt-0">
                 <Button
                   variant={"text"}

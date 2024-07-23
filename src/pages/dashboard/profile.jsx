@@ -124,19 +124,19 @@ export function Profile() {
               <Typography variant="h6" color="blue-gray" className="mb-3">
                 Platform Settings
               </Typography>
-              <ul className="flex flex-col gap-6">
-                {conversationsData.map((props) => (
-                  <MessageCard
-                    key={props.name}
-                    {...props}
-                    action={
-                      <Button variant="text" size="sm">
-                        reply
-                      </Button>
-                    }
-                  />
-                ))}
-              </ul>
+              {/*<ul className="flex flex-col gap-6">*/}
+              {/*  {conversationsData.map((props) => (*/}
+              {/*    <MessageCard*/}
+              {/*      key={props.name}*/}
+              {/*      {...props}*/}
+              {/*      action={*/}
+              {/*        <Button variant="text" size="sm">*/}
+              {/*          reply*/}
+              {/*        </Button>*/}
+              {/*      }*/}
+              {/*    />*/}
+              {/*  ))}*/}
+              {/*</ul>*/}
             </div>
           </div>
           <div className="px-4 pb-4">
