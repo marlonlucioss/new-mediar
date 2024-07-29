@@ -127,10 +127,10 @@ export function Perfil({ setPage }) {
         <CardBody className="px-0 p-6 pt-0">
           <PerfilHeader />
           <PerfilAbout data={data} setData={setData} />
-          <PerfilGeneralInfo />
-          <PerfilEndereco />
-          <PerfilContato />
-          <PerfilSenha />
+          <PerfilGeneralInfo data={data} setData={setData} />
+          <PerfilEndereco data={data} setData={setData} />
+          <PerfilContato data={data} setData={setData} />
+          {/*<PerfilSenha data={data} setData={setData} />*/}
         </CardBody>
       </Card>
     </Card>

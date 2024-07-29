@@ -19,6 +19,7 @@
     "@fullcalendar/timegrid": "^6.1.10",
     "@heroicons/react": "2.0.18",
     "@material-tailwind/react": "2.1.4",
+    "@react-br-forms/cpf-cnpj-mask": "^1.0.6",
     "apexcharts": "3.44.0",
     "axios": "^1.6.8",
     "flowbite-react": "^0.7.2",
@@ -27,7 +28,9 @@
     "react-apexcharts": "1.4.1",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.51.4",
-    "react-router-dom": "6.17.0"
+    "react-router-dom": "6.17.0",
+    "react-simple-cep-mask": "^0.1.4",
+    "react-telefone-brasileiro": "^1.0.5"
   },
   "devDependencies": {
     "@types/react": "18.2.31",
