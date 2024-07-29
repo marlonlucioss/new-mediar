@@ -214,14 +214,15 @@ export function SignIn() {
           backgroundColor: '#86c1d8cc',
           width: '100%',
           height: '100%',
+          paddingTop: '40px'
         }}>
           <Typography variant="paragraph" color="" style={{
             height: '48px',
             top: '69px',
             left: '8px',
-            fontSize: '14px',
+            fontSize: '18px',
             fontWeight: '500',
-            color: '#828282',
+            color: '#fff',
             lineHeight: '24px',
             letterSpacing: '0px',
             textAlign: 'center',
@@ -231,9 +232,9 @@ export function SignIn() {
             height: '48px',
             top: '69px',
             left: '8px',
-            fontSize: '14px',
+            fontSize: '18px',
             fontWeight: '500',
-            color: '#828282',
+            color: '#fff',
             lineHeight: '24px',
             letterSpacing: '0px',
             textAlign: 'center',
@@ -243,8 +244,8 @@ export function SignIn() {
             <div className="mb-1 flex flex-col gap-6">
               <Input
                 size="lg"
-                // placeholder="Nome"
-                label="Nome completo"
+                placeholder="Nome completo"
+                // label="Nome completo"
                 className=" !border-t-blue-gray-200 focus:!border-t-gray-900 bg-white"
                 labelProps={{
                   className: "before:content-none after:content-none",
@@ -254,8 +255,8 @@ export function SignIn() {
               {errors.nome && <span className='text-red-600'>This field is required</span>}
               <Input
                 size="lg"
-                // placeholder="exemplo@email.com"
-                label="Email"
+                placeholder="Email"
+                // label="Email"
                 className=" !border-t-blue-gray-200 focus:!border-t-gray-900 bg-white"
                 labelProps={{
                   className: "before:content-none after:content-none",
@@ -265,8 +266,8 @@ export function SignIn() {
               {errors.email && <span className='text-red-600'>This field is required</span>}
               <Input
                 size="lg"
-                // placeholder="(xx) xxxxx-xxxx"
-                label="Telefone"
+                placeholder="Telefone"
+                // label="Telefone"
                 className=" !border-t-blue-gray-200 focus:!border-t-gray-900 bg-white"
                 labelProps={{
                   className: "before:content-none after:content-none",
@@ -284,8 +285,8 @@ export function SignIn() {
               {errors.atividade && <span className='text-red-600'>This field is required</span>}
               <Input
                 size="lg"
-                // placeholder="xxx.xxx.xxx-xx"
-                label="CPF ou CNPJ"
+                placeholder="CPF ou CNPJ"
+                // label="CPF ou CNPJ"
                 className=" !border-t-blue-gray-200 focus:!border-t-gray-900 bg-white"
                 labelProps={{
                   className: "before:content-none after:content-none",
@@ -305,14 +306,14 @@ export function SignIn() {
               <Typography variant="paragraph" color="" style={{width: '348px',
                 top: '69px',
                 left: '8px',
-                fontSize: '14px',
+                fontSize: '18px',
                 fontWeight: '500',
-                color: '#828282',
+                color: '#fff',
                 lineHeight: '24px',
                 letterSpacing: '0px',
                 textAlign: 'center',
                 margin: 'auto'
-              }} className="text-lg font-normal">Crie sua senha</Typography>
+              }} className="text-xl font-normal">Crie sua senha</Typography>
               <Input
                 type="password"
                 size="lg"
@@ -327,9 +328,9 @@ export function SignIn() {
               <Typography variant="paragraph" color="" style={{width: '348px',
                 top: '69px',
                 left: '8px',
-                fontSize: '14px',
+                fontSize: '18px',
                 fontWeight: '500',
-                color: '#828282',
+                color: '#fff',
                 lineHeight: '24px',
                 letterSpacing: '0px',
                 textAlign: 'center',
@@ -349,17 +350,16 @@ export function SignIn() {
             </div>
             <Checkbox
               label={
-                <Typography color="blue-gray" className="flex font-medium">
-                  I agree with the
+                <Typography color="white" className="flex font-medium">
+                  Eu concordo com os
                   <Typography
                     as="a"
                     href="#"
                     color="blue"
                     className="font-medium transition-colors hover:text-blue-700"
                   >
-                    &nbsp;terms and conditions
+                    &nbsp;termos e condições.
                   </Typography>
-                  .
                 </Typography>
               }
             />
