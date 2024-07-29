@@ -92,7 +92,7 @@ export function Perfil({ setPage }) {
   }
 
   useEffect(() => {
-    axios.put('http://localhost:3001/users', data, {
+    axios.put('https://mediar360.com:3001/users', data, {
       headers: {
         authorization: 'bearer ' + JSON.parse(localStorage.getItem('mediar')).token
       }

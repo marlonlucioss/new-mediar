@@ -23,12 +23,19 @@ export function SignIn() {
     formState: { errors },
   } = useForm()
 
+  const {
+    register: register2,
+    handleSubmit: handleSubmit2,
+    watch: watch2,
+    formState: { errors: errors2 },
+  } = useForm()
+
   const onSubmitLogin = (data) => callLogin(data)
 
   const onSubmitRegister = (data) => callRegister({...data, role: atividade})
 
   const callLogin = (data) => {
-    axios.post('http://localhost:3001/auth/signin', {
+    axios.post('https://mediar360.com:3001/auth/signin', {
       email: data.email,
       password: data.password,
     })
@@ -56,7 +63,7 @@ export function SignIn() {
     // password_confirmation
     // role-
     // telefone-
-    axios.post('http://localhost:3001/auth/signup', {
+    axios.post('https://mediar360.com:3001/auth/signup', {
       email: data.email,
       name: data.nome,
       cpfCnpj: data.cpfCnpj,
@@ -108,7 +115,7 @@ export function SignIn() {
             margin: 'auto'
           }} className="text-lg font-normal">Acesse a plataforma Mediar360 inserindo suas credenciais abaixo.</Typography>
         </div>
-        <form onSubmit={handleSubmit(onSubmitLogin)} className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
+        <form name='login' onSubmit={handleSubmit(onSubmitLogin)} className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
           <div className="mb-1 flex flex-col gap-6">
             <Input
               size="lg"
@@ -240,7 +247,7 @@ export function SignIn() {
             textAlign: 'center',
             margin: 'auto'
           }} className="text-lg font-normal">Acesse a plataforma Mediar360 inserindo suas informações abaixo.</Typography>
-          <form onSubmit={handleSubmit(onSubmitRegister)} className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
+          <form name='register' onSubmit={handleSubmit2(onSubmitRegister)} className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
             <div className="mb-1 flex flex-col gap-6">
               <Input
                 size="lg"
@@ -250,9 +257,9 @@ export function SignIn() {
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
-                {...register("nome", { required: true })}
+                {...register2("nome", { required: true })}
               />
-              {errors.nome && <span className='text-red-600'>This field is required</span>}
+              {errors2.nome && <span className='text-red-600'>This field is required</span>}
               <Input
                 size="lg"
                 placeholder="Email"
@@ -261,9 +268,9 @@ export function SignIn() {
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
-                {...register("email", { required: true })}
+                {...register2("email", { required: true })}
               />
-              {errors.email && <span className='text-red-600'>This field is required</span>}
+              {errors2.email && <span className='text-red-600'>This field is required</span>}
               <Input
                 size="lg"
                 placeholder="Telefone"
@@ -272,9 +279,9 @@ export function SignIn() {
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
-                {...register("telefone", { required: true })}
+                {...register2("telefone", { required: true })}
               />
-              {errors.telefone && <span className='text-red-600'>This field is required</span>}
+              {errors2.telefone && <span className='text-red-600'>This field is required</span>}
               <Select label="Selecione sua atividade" className='bg-white' value={atividade}
                       onChange={(val) => setAtividade(val)}>
                 <Option value='mediador'>Mediador</Option>
@@ -282,7 +289,7 @@ export function SignIn() {
                 <Option value='empresa'>Empresa</Option>
                 <Option value='advogado'>Advogado</Option>
               </Select>
-              {errors.atividade && <span className='text-red-600'>This field is required</span>}
+              {errors2.atividade && <span className='text-red-600'>This field is required</span>}
               <Input
                 size="lg"
                 placeholder="CPF ou CNPJ"
@@ -291,9 +298,9 @@ export function SignIn() {
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
-                {...register("cpfCnpj", { required: true })}
+                {...register2("cpfCnpj", { required: true })}
               />
-              {errors.cpfCnpj && <span className='text-red-600'>This field is required</span>}
+              {errors2.cpfCnpj && <span className='text-red-600'>This field is required</span>}
               {/*<Input*/}
               {/*  size="lg"*/}
               {/*  placeholder="Nome de usuário"*/}
@@ -322,9 +329,9 @@ export function SignIn() {
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
-                {...register("password", { required: true })}
+                {...register2("password", { required: true })}
               />
-              {errors.password && <span className='text-red-600'>This field is required</span>}
+              {errors2.password && <span className='text-red-600'>This field is required</span>}
               <Typography variant="paragraph" color="" style={{width: '348px',
                 top: '69px',
                 left: '8px',
@@ -344,9 +351,9 @@ export function SignIn() {
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
-                {...register("password_confirmation", { required: true })}
+                {...register2("password_confirmation", { required: true })}
               />
-              {errors.password && <span className='text-red-600'>This field is required</span>}
+              {errors2.password && <span className='text-red-600'>This field is required</span>}
             </div>
             <Checkbox
               label={

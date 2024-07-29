@@ -188,7 +188,7 @@ export function ScheduleMediador({ setPage, setData, data }) {
   const callCreateConciliation = () => {
     selectDateTime()
     const token = JSON.parse(localStorage.getItem('mediar')).token
-    axios.post('http://localhost:3001/conciliations', {
+    axios.post('https://mediar360.com:3001/conciliations', {
       mediador: data.mediador.name,
       mediando: JSON.parse(localStorage.getItem('mediar')).user.name,
       criadoPor: JSON.parse(localStorage.getItem('mediar')).user.name,

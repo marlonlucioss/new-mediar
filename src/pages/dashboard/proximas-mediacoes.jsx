@@ -34,7 +34,7 @@ export function ProximasMediacoes({ setPage }) {
 
   useEffect(() => {
     const token = JSON.parse(localStorage.getItem('mediar')).token
-    axios.get('http://localhost:3001/conciliations', {
+    axios.get('https://mediar360.com:3001/conciliations', {
       headers: {
         authorization: 'bearer ' + token
       }
