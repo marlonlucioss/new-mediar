@@ -39,6 +39,7 @@ import PerfilEndereco from "@/components/perfilEndereco.jsx";
 import PerfilContato from "@/components/perfilContato.jsx";
 import PerfilSenha from "@/components/perfilSenha.jsx";
 import axios from "axios";
+import {API_URL} from "@/config.js";
 const events = [
   { title: 'Meeting', start: new Date() }
 ]
@@ -92,7 +93,7 @@ export function Perfil({ setPage }) {
   }
 
   useEffect(() => {
-    axios.put('https://mediar360.com:3001/users', data, {
+    axios.put(API_URL + '/users', data, {
       headers: {
         authorization: 'bearer ' + JSON.parse(localStorage.getItem('mediar')).token
       }

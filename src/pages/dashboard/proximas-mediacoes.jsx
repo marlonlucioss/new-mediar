@@ -27,6 +27,7 @@ import {ComputerDesktopIcon, PlusIcon} from "@heroicons/react/24/outline/index.j
 import Pagination from "@/components/pagination.jsx";
 import {ChevronLeftIcon, ChevronRightIcon} from "@heroicons/react/20/solid";
 import axios from "axios";
+import {API_URL} from "@/config.js";
 
 export function ProximasMediacoes({ setPage }) {
 
@@ -34,7 +35,7 @@ export function ProximasMediacoes({ setPage }) {
 
   useEffect(() => {
     const token = JSON.parse(localStorage.getItem('mediar')).token
-    axios.get('https://mediar360.com:3001/conciliations', {
+    axios.get(API_URL + '/conciliations', {
       headers: {
         authorization: 'bearer ' + token
       }

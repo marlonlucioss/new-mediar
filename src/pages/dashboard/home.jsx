@@ -35,6 +35,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import {InformationCircleIcon} from "@heroicons/react/24/outline/index.js";
 import axios from "axios";
+import {API_URL} from "@/config.js";
 const events = [
   { title: 'Meeting', start: new Date() }
 ]
@@ -87,7 +88,7 @@ export function Home() {
 
   useEffect(() => {
     const token = JSON.parse(localStorage.getItem('mediar')).token
-    axios.get('https://mediar360.com:3001/conciliations/next', {
+    axios.get(API_URL + '/conciliations/next', {
       headers: {
         authorization: 'bearer ' + token
       }
@@ -104,7 +105,7 @@ export function Home() {
       .finally(function () {
         // always executed
       });
-    axios.get('https://mediar360.com:3001/conciliations/statistics', {
+    axios.get(API_URL + '/conciliations/statistics', {
       headers: {
         authorization: 'bearer ' + token
       }

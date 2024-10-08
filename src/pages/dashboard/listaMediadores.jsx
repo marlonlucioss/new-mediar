@@ -24,6 +24,7 @@ import {platformSettingsData, conversationsData, projectsData, ordersOverviewDat
 import {StarIcon} from "@heroicons/react/24/solid/index.js";
 import React, {useEffect, useState} from "react";
 import axios from "axios";
+import {API_URL} from "@/config.js";
 
 export function ListaMediadores({ setPage, setData, data }) {
   const [usersList, setUsersList] = useState([])
@@ -35,7 +36,7 @@ export function ListaMediadores({ setPage, setData, data }) {
   }
 
   useEffect(() => {
-    axios.get('https://mediar360.com:3001/users', {
+    axios.get(API_URL + '/users', {
       headers: {
         authorization: 'bearer ' + JSON.parse(localStorage.getItem('mediar')).token
       }

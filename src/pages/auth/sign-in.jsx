@@ -10,6 +10,7 @@ import {Link, Navigate, useNavigate} from "react-router-dom";
 import axios from "axios";
 import { useForm } from "react-hook-form"
 import {useEffect, useState} from "react";
+import {API_URL} from "@/config.js";
 
 export function SignIn() {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ export function SignIn() {
   const onSubmitRegister = (data) => callRegister({...data, role: atividade})
 
   const callLogin = (data) => {
-    axios.post('https://mediar360.com:3001/auth/signin', {
+    axios.post(API_URL + '/auth/signin', {
       email: data.email,
       password: data.password,
     })
@@ -63,7 +64,7 @@ export function SignIn() {
     // password_confirmation
     // role-
     // telefone-
-    axios.post('https://mediar360.com:3001/auth/signup', {
+    axios.post(API_URL + '/auth/signup', {
       email: data.email,
       name: data.nome,
       cpfCnpj: data.cpfCnpj,

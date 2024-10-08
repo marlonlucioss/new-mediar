@@ -26,6 +26,7 @@ import React, {useEffect, useState} from "react";
 import {PlusIcon} from "@heroicons/react/24/outline/index.js";
 import ResumoMediador from "@/widgets/mediar/ResumoMediador.jsx";
 import axios from "axios";
+import {API_URL} from "@/config.js";
 
 const getDaysInMonth = (month) => {
   const date = new Date(new Date().getFullYear(), month, 1);
@@ -188,7 +189,7 @@ export function ScheduleMediador({ setPage, setData, data }) {
   const callCreateConciliation = () => {
     selectDateTime()
     const token = JSON.parse(localStorage.getItem('mediar')).token
-    axios.post('https://mediar360.com:3001/conciliations', {
+    axios.post(API_URL + '/conciliations', {
       mediador: data.mediador.name,
       mediando: JSON.parse(localStorage.getItem('mediar')).user.name,
       criadoPor: JSON.parse(localStorage.getItem('mediar')).user.name,
