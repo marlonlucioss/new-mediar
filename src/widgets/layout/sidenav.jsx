@@ -36,24 +36,26 @@ export function Sidenav({ brandImg, brandName, routes, setPage }) {
             <MainLogo style={{ display: 'inline' }} />
           </Typography>
         </Link>
-        <div className="m-8">
-          <Button
-            variant={"text"}
-            color={'white'}
-            className="flex items-center gap-4 px-4 capitalize w-56"
-            fullWidth
-            style={{backgroundColor: '#11afe4'}}
-            onClick={() => setPage('lista-mediadores')}
-          >
-            <PlusIcon strokeWidth={2.5} className="h-5 w-5 text-white" />
-            <Typography
-              color="inherit"
-              className="font-medium capitalize"
+        {JSON.parse(localStorage.getItem('mediar')).user.role === 'empresa' && (
+          <div className="m-8">
+            <Button
+              variant={"text"}
+              color={'white'}
+              className="flex items-center gap-4 px-4 capitalize w-56"
+              fullWidth
+              style={{backgroundColor: '#11afe4'}}
+              onClick={() => setPage('step1')}
             >
-              Nova mediação
-            </Typography>
-          </Button>
-        </div>
+              <PlusIcon strokeWidth={2.5} className="h-5 w-5 text-white" />
+              <Typography
+                color="inherit"
+                className="font-medium capitalize"
+              >
+                Nova mediação
+              </Typography>
+            </Button>
+          </div>
+        )}
         <IconButton
           variant="text"
           color="white"

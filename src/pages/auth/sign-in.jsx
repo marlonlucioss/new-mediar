@@ -286,9 +286,8 @@ export function SignIn() {
               <Select label="Selecione sua atividade" className='bg-white' value={atividade}
                       onChange={(val) => setAtividade(val)}>
                 <Option value='mediador'>Mediador</Option>
-                <Option value='mediando'>Mediando</Option>
+                <Option value='cliente'>Cliente</Option>
                 <Option value='empresa'>Empresa</Option>
-                <Option value='advogado'>Advogado</Option>
               </Select>
               {errors2.atividade && <span className='text-red-600'>This field is required</span>}
               <Input

@@ -27,12 +27,11 @@ import SuccessIcon from "@/images-svg/success-mediation.jsx";
 import ResumoMediador from "@/widgets/mediar/ResumoMediador.jsx";
 import axios from "axios";
 
-export function SuccessSchedule({ setPage, data }) {
+export function SuccessSchedulingCliente({ setPage, data }) {
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log(data)
     navigate("/dashboard/proximas-mediacoes")
     setTimeout(() => setPage(null), 2000)
   }, [setPage])
@@ -115,4 +114,4 @@ export function SuccessSchedule({ setPage, data }) {
   );
 }
 
-export default SuccessSchedule;
+export default SuccessSchedulingCliente;

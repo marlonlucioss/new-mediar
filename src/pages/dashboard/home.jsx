@@ -70,7 +70,8 @@ export function Home() {
   const [conciliationStatistics, setConciliationStatistics] = useState({
     canceled:0,
     finished:0,
-    scheduled:0
+    scheduled:0,
+    waiting:0
   });
   const [showAlerts, setShowAlerts] = React.useState({
     blue: true,
@@ -88,7 +89,7 @@ export function Home() {
 
   useEffect(() => {
     const token = JSON.parse(localStorage.getItem('mediar')).token
-    axios.get(API_URL + '/conciliations/next', {
+    axios.get(API_URL + `/conciliations/next${JSON.parse(localStorage.getItem('mediar')).user.role === 'empresa' ? '?empresa='+JSON.parse(localStorage.getItem('mediar')).user.cpfCnpj : ''}${JSON.parse(localStorage.getItem('mediar')).user.role === 'cliente' ? '?cliente='+JSON.parse(localStorage.getItem('mediar')).user.email : ''}${JSON.parse(localStorage.getItem('mediar')).user.role === 'mediador' ? '?mediador='+JSON.parse(localStorage.getItem('mediar')).user.email : ''}`, {
       headers: {
         authorization: 'bearer ' + token
       }
@@ -105,7 +106,7 @@ export function Home() {
       .finally(function () {
         // always executed
       });
-    axios.get(API_URL + '/conciliations/statistics', {
+    axios.get(API_URL + `/conciliations/statistics${JSON.parse(localStorage.getItem('mediar')).user.role === 'empresa' ? '?empresa='+JSON.parse(localStorage.getItem('mediar')).user.cpfCnpj : ''}${JSON.parse(localStorage.getItem('mediar')).user.role === 'cliente' ? '?cliente='+JSON.parse(localStorage.getItem('mediar')).user.email : ''}${JSON.parse(localStorage.getItem('mediar')).user.role === 'mediador' ? '?mediador='+JSON.parse(localStorage.getItem('mediar')).user.email : ''}`, {
       headers: {
         authorization: 'bearer ' + token
       }
@@ -263,13 +264,13 @@ export function Home() {
           </CardBody>
         </Card>
         <Card className="" style={{background: 'none', boxShadow: 'none'}}>
-          <Card className="mb-6" style={{backgroundColor: '#DBF5D2'}}>
+          <Card className="mb-6" style={{backgroundColor: '#93c9f8'}}>
             <CardBody className="text-center">
               <Typography variant="h4" color="blue-gray" className="mb-2">
-                {conciliationStatistics.finished}
+                {conciliationStatistics.waiting}
               </Typography>
               <Typography color="blue-gray" className="font-bold text-blue-gray-800" textGradient>
-                Mediações Realizadas
+                Mediações Aguardando
               </Typography>
               {/*<Typography color="blue-gray" className="font-medium text-xs" textGradient>*/}
               {/*  Novembro 2023*/}
@@ -283,6 +284,19 @@ export function Home() {
               </Typography>
               <Typography color="blue-gray" className="font-bold text-blue-gray-800" textGradient>
                 Mediações Agendadas
+              </Typography>
+              {/*<Typography color="blue-gray" className="font-medium text-xs" textGradient>*/}
+              {/*  Novembro 2023*/}
+              {/*</Typography>*/}
+            </CardBody>
+          </Card>
+          <Card className="mb-6" style={{backgroundColor: '#DBF5D2'}}>
+            <CardBody className="text-center">
+              <Typography variant="h4" color="blue-gray" className="mb-2">
+                {conciliationStatistics.finished}
+              </Typography>
+              <Typography color="blue-gray" className="font-bold text-blue-gray-800" textGradient>
+                Mediações Realizadas
               </Typography>
               {/*<Typography color="blue-gray" className="font-medium text-xs" textGradient>*/}
               {/*  Novembro 2023*/}

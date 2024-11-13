@@ -27,6 +27,7 @@ import {PlusIcon} from "@heroicons/react/24/outline/index.js";
 import ResumoMediador from "@/widgets/mediar/ResumoMediador.jsx";
 import axios from "axios";
 import {API_URL} from "@/config.js";
+import {Step1Cliente} from "@/pages/dashboard/form-finalizar-mediacao/step1.jsx";
 
 const getDaysInMonth = (month) => {
   const date = new Date(new Date().getFullYear(), month, 1);
@@ -170,7 +171,7 @@ const horarios = [
   }
 ]
 
-export function ScheduleMediador({ setPage, setData, data }) {
+export function Step4Cliente({ setPage, setData, requestData }) {
   const [days, setDays] = useState([])
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
   const [selectedDay, setSelectedDay] = useState(new Date().getDate())
@@ -186,36 +187,44 @@ export function ScheduleMediador({ setPage, setData, data }) {
     setDays(getDaysInMonth(new Date().getMonth()))
   }, []);
 
-  // const  callCreateConciliation = () => {
-  //   selectDateTime()
-  //   const token = JSON.parse(localStorage.getItem('mediar')).token
-  //   axios.post(API_URL + '/conciliations', {
-  //     mediador: data.mediador.name,
-  //     mediando: JSON.parse(localStorage.getItem('mediar')).user.name,
-  //     criadoPor: JSON.parse(localStorage.getItem('mediar')).user.name,
-  //     horario: `${selectedHour[0]}${selectedHour[1]}:${selectedHour[2]}0 - 1${selectedHour[2] === '3' ? parseInt(selectedHour[1]) + 1 : selectedHour[1]}:${selectedHour[2] === '0' ? 3 : 0}0`,
-  //     tipoMediacao: 'Familiar',
-  //     status: 'agendada',
-  //     plataforma: 'web',
-  //     dataMediacao: `2024-${selectedMonth + 1}-${selectedDay}`,
-  //   }, {
-  //     headers: {
-  //       authorization: 'bearer ' + token
-  //     }
-  //   })
-  //     .then(function (response) {
-  //       // handle success
-  //       setPage('sucesso-agendamento')
-  //       console.log(response);
-  //     })
-  //     .catch(function (error) {
-  //       // handle error
-  //       console.log(error);
-  //     })
-  //     .finally(function () {
-  //       // always executed
-  //     });
-  // }
+  useEffect(() => {
+    console.log(requestData)
+  }, [requestData]);
+
+  const  callCreateConciliation = () => {
+    console.log('step4cliente', {
+      horario: `${selectedHour[0]}${selectedHour[1]}:${selectedHour[2]}0 - 1${selectedHour[2] === '3' ? parseInt(selectedHour[1]) + 1 : selectedHour[1]}:${selectedHour[2] === '0' ? 3 : 0}0`,
+      status: 'agendada',
+      dataMediacao: `2024-${selectedMonth + 1}-${selectedDay}`,
+      ...requestData
+    })
+    selectDateTime()
+    console.log(`${selectedHour[0]}${selectedHour[1]}:${selectedHour[2]}0 - 1${selectedHour[2] === '3' ? parseInt(selectedHour[1]) + 1 : selectedHour[1]}:${selectedHour[2] === '0' ? 3 : 0}0`)
+    console.log(`2024-${selectedMonth + 1}-${selectedDay}`)
+    const token = JSON.parse(localStorage.getItem('mediar')).token
+    axios.put(API_URL + '/conciliations', {
+      ...requestData,
+      horario: `${selectedHour[0]}${selectedHour[1]}:${selectedHour[2]}0 - 1${selectedHour[2] === '3' ? parseInt(selectedHour[1]) + 1 : selectedHour[1]}:${selectedHour[2] === '0' ? 3 : 0}0`,
+      status: 'agendada',
+      dataMediacao: `2024-${selectedMonth + 1}-${selectedDay}`,
+    }, {
+      headers: {
+        authorization: 'bearer ' + token
+      }
+    })
+      .then(function (response) {
+        // handle success
+        setPage('step5Cliente')
+        console.log(response);
+      })
+      .catch(function (error) {
+        // handle error
+        console.log(error);
+      })
+      .finally(function () {
+        // always executed
+      });
+  }
 
   return (
     <Card className='' style={{flexFlow: 'wrap', boxShadow: 'none'}}>
@@ -279,19 +288,19 @@ export function ScheduleMediador({ setPage, setData, data }) {
               {/*{action}*/}
             </CardHeader>
             <CardBody className="p-0">
-                <Typography
-                  variant="small"
-                  className="font-normal text-blue-gray-500"
-                >
-                  <ButtonGroup className="gap-3 p-1" style={{flexFlow: 'wrap', justifyContent: 'space-between', columnGap: 'normal'}}>
-                    { meses.map((mes) => {
-                      return <Button disabled={mes.value < new Date().getMonth()} onClick={() => {
-                        setDays(getDaysInMonth(mes.value))
-                        setSelectedMonth(mes.value)
-                      }} className="rounded mediar360-bt" style={{width: '115px', backgroundColor: `${selectedMonth === mes.value ? 'rgb(17, 175, 228)' : 'white'}`, color: `${selectedMonth === mes.value ? 'white' : 'rgb(17, 175, 228)'}`, border: '1px solid rgb(17, 175, 228)'}}>{mes.label}</Button>
-                    })}
-                  </ButtonGroup>
-                </Typography>
+              <Typography
+                variant="small"
+                className="font-normal text-blue-gray-500"
+              >
+                <ButtonGroup className="gap-3 p-1" style={{flexFlow: 'wrap', justifyContent: 'space-between', columnGap: 'normal'}}>
+                  { meses.map((mes) => {
+                    return <Button disabled={mes.value < new Date().getMonth()} onClick={() => {
+                      setDays(getDaysInMonth(mes.value))
+                      setSelectedMonth(mes.value)
+                    }} className="rounded mediar360-bt" style={{width: '115px', backgroundColor: `${selectedMonth === mes.value ? 'rgb(17, 175, 228)' : 'white'}`, color: `${selectedMonth === mes.value ? 'white' : 'rgb(17, 175, 228)'}`, border: '1px solid rgb(17, 175, 228)'}}>{mes.label}</Button>
+                  })}
+                </ButtonGroup>
+              </Typography>
             </CardBody>
           </Card>
           <br/>
@@ -386,4 +395,4 @@ export function ScheduleMediador({ setPage, setData, data }) {
   );
 }
 
-export default ScheduleMediador;
+export default Step4Cliente;
