@@ -20,6 +20,7 @@ import {
   LockClosedIcon,
 } from "@heroicons/react/24/solid";
 import {useForm} from "react-hook-form";
+import InputMask from "react-input-mask";
 
 function formatCardNumber(value) {
   const val = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
@@ -62,6 +63,17 @@ export function Step2Cliente({ setPage, setData, requestData }) {
   const [type, setType] = React.useState("card");
   const [cardNumber, setCardNumber] = React.useState("");
   const [cardExpires, setCardExpires] = React.useState("");
+  const [cpfMask, setCpfMask] = React.useState("999.999.999-99");
+  const cpfClienteValue = watch("cpf_cliente");
+
+  React.useEffect(() => {
+    if (cpfClienteValue) {
+      const unmaskedValue = cpfClienteValue.replace(/\D/g, "");
+      setCpfMask("999.999.999-99");
+    } else {
+      setCpfMask("999.999.999-99"); // Default mask
+    }
+  }, [cpfClienteValue]);
   return (
     <Card className='w-full' style={{flexFlow: 'wrap', boxShadow: 'none'}}>
       <Card className="w-4/6 shadow-none">
@@ -83,7 +95,7 @@ export function Step2Cliente({ setPage, setData, requestData }) {
         </CardHeader>
         <CardBody>
           <form className="flex flex-col" onSubmit={handleSubmit(onSubmit)}>
-            <div>
+            <div className="mb-4">
               <Typography
                 variant="small"
                 color="blue-gray"
@@ -94,12 +106,18 @@ export function Step2Cliente({ setPage, setData, requestData }) {
               <Input
                 type="text"
                 placeholder="Nome do cliente"
-                className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+                className="bg-white !border-t-blue-gray-200 focus:!border-t-gray-900"
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
-                {...register("nome_cliente", { required: true })}
+                {...register("nome_cliente", { required: "Campo obrigatório" })}
+                error={!!errors.nome_cliente}
               />
+              {errors.nome_cliente && (
+                <Typography variant="small" color="red" className="mt-1">
+                  {errors.nome_cliente.message}
+                </Typography>
+              )}
             </div>
 
             <div className="mb-4 gap-4">
@@ -133,15 +151,28 @@ export function Step2Cliente({ setPage, setData, requestData }) {
                   >
                     CPF do cliente
                   </Typography>
-                  <Input
-                    type="text"
-                    placeholder="CPF"
-                    className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
-                    labelProps={{
-                      className: "before:content-none after:content-none",
-                    }}
-                    {...register("cpf_cliente", { required: true })}
-                  />
+                  <InputMask
+                    mask={cpfMask}
+                    {...register("cpf_cliente", { required: "Campo obrigatório" })}
+                  >
+                    {(inputProps) => (
+                      <Input
+                        {...inputProps}
+                        type="text"
+                        placeholder="CPF"
+                        className="bg-white !border-t-blue-gray-200 focus:!border-t-gray-900"
+                        labelProps={{
+                          className: "before:content-none after:content-none",
+                        }}
+                        error={!!errors.cpf_cliente}
+                      />
+                    )}
+                  </InputMask>
+                  {errors.cpf_cliente && (
+                    <Typography variant="small" color="red" className="mt-1">
+                      {errors.cpf_cliente.message}
+                    </Typography>
+                  )}
                   {/*<Input*/}
                   {/*  maxLength={5}*/}
                   {/*  value={formatExpires(cardExpires)}*/}
@@ -162,15 +193,28 @@ export function Step2Cliente({ setPage, setData, requestData }) {
                   >
                     Telefone
                   </Typography>
-                  <Input
-                    type="text"
-                    placeholder="Telefone"
-                    className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
-                    labelProps={{
-                      className: "before:content-none after:content-none",
-                    }}
-                    {...register("telefone_cliente", { required: true })}
-                  />
+                  <InputMask
+                    mask="(99) 99999-9999"
+                    {...register("telefone_cliente", { required: "Campo obrigatório" })}
+                  >
+                    {(inputProps) => (
+                      <Input
+                        {...inputProps}
+                        type="text"
+                        placeholder="Telefone"
+                        className="bg-white !border-t-blue-gray-200 focus:!border-t-gray-900"
+                        labelProps={{
+                          className: "before:content-none after:content-none",
+                        }}
+                        error={!!errors.telefone_cliente}
+                      />
+                    )}
+                  </InputMask>
+                  {errors.telefone_cliente && (
+                    <Typography variant="small" color="red" className="mt-1">
+                      {errors.telefone_cliente.message}
+                    </Typography>
+                  )}
                   {/*<Input*/}
                   {/*  maxLength={4}*/}
                   {/*  containerProps={{ className: "min-w-[72px]" }}*/}
@@ -192,12 +236,24 @@ export function Step2Cliente({ setPage, setData, requestData }) {
               <Input
                 type='email'
                 placeholder="name@mail.com"
-                className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+                className="bg-white !border-t-blue-gray-200 focus:!border-t-gray-900"
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
-                {...register("email_cliente", { required: true })}
+                {...register("email_cliente", { 
+                  required: "Campo obrigatório", 
+                  pattern: {
+                    value: /^\S+@\S+$/i,
+                    message: "Endereço de e-mail inválido"
+                  }
+                })}
+                error={!!errors.email_cliente}
               />
+              {errors.email_cliente && (
+                <Typography variant="small" color="red" className="mt-1">
+                  {errors.email_cliente.message}
+                </Typography>
+              )}
             </div>
             <Button
               variant={"text"}

@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import { Cog6ToothIcon } from "@heroicons/react/24/solid";
-import { IconButton } from "@material-tailwind/react";
+import { IconButton, Dialog, DialogHeader, DialogBody, DialogFooter, Button as MTButton } from "@material-tailwind/react";
 import {
   Sidenav,
   DashboardNavbar,
@@ -31,21 +31,45 @@ export function Dashboard() {
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState({});
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const  callCreateConciliation = () => {
     const token = JSON.parse(localStorage.getItem('mediar')).token
     setLoading(true)
-    axios.post(API_URL + '/conciliations', {
-      ...data,
-      mediador: '',
-      mediando: data.nome_cliente,
-      criadoPor: JSON.parse(localStorage.getItem('mediar')).user,
-      horario: '',
-      tipoMediacao: '',
-      status: 'aguardando',
-      plataforma: 'web',
-      dataMediacao: ``,
-    }, {
+    const {
+      valor_causa,
+      valor_proposta,
+      validade_proposta,
+      nome_cliente,
+      telefone_cliente,
+      cpf_cliente,
+      // Capture other fields from data (like 'proposta' text, 'observacoes', etc.)
+      ...restOfData 
+    } = data;
+
+    const payloadToSend = {
+      ...restOfData, // Send other relevant parts of `data` collected from previous steps
+      valor_causa: valor_causa !== undefined && valor_causa !== null && !isNaN(parseInt(valor_causa, 10)) ? parseInt(valor_causa, 10) / 100 : null,
+      valor_proposta: valor_proposta !== undefined && valor_proposta !== null && !isNaN(parseInt(valor_proposta, 10)) ? parseInt(valor_proposta, 10) / 100 : null,
+      // Format validade_proposta to YYYY-MM-DD string; ensure it's a Date object first
+      validade_proposta: validade_proposta ? new Date(validade_proposta).toISOString().split('T')[0] : null,
+      telefone_cliente: telefone_cliente ? String(telefone_cliente).replace(/[^0-9]/g, '') : null,
+      cpf_cliente: cpf_cliente ? String(cpf_cliente).replace(/[^0-9]/g, '') : null,
+      
+      // Static or derived fields for the conciliation payload
+      mediador: '', // Placeholder or to be assigned by backend/later logic
+      mediando: nome_cliente, // From data collected in earlier steps
+      nome_cliente, // From data collected in earlier steps
+      criadoPor: JSON.parse(localStorage.getItem('mediar')).user, // User who initiated
+      horario: '', // Placeholder for the actual mediation time slot
+      tipoMediacao: '', // Placeholder for the type of mediation
+      status: 'aguardando', // Default status for a new conciliation
+      plataforma: 'web', // Indicates creation from the web platform
+      dataMediacao: ``, // Placeholder for the actual date of mediation (distinct from proposal validity)
+    };
+
+    axios.post(API_URL + '/conciliations', payloadToSend, {
       headers: {
         authorization: 'bearer ' + token
       }
@@ -54,18 +78,35 @@ export function Dashboard() {
         // handle success
         setPage('step4')
         console.log(response);
+        setLoading(false)
       })
       .catch(function (error) {
         // handle error
         console.log(error);
+        setErrorMessage("Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.");
+        setIsErrorModalOpen(true);
+        setLoading(false)
       })
       .finally(function () {
         // always executed
       });
   }
 
+  const handleErrorModalClose = () => setIsErrorModalOpen(false);
+
   return (
     <div className="min-h-screen bg-white">
+      <Dialog open={isErrorModalOpen} handler={handleErrorModalClose}>
+        <DialogHeader>Erro na Solicitação</DialogHeader>
+        <DialogBody divider>
+          {errorMessage}
+        </DialogBody>
+        <DialogFooter>
+          <MTButton variant="gradient" color="red" onClick={handleErrorModalClose}>
+            <span>Fechar</span>
+          </MTButton>
+        </DialogFooter>
+      </Dialog>
       <Sidenav
         setPage={setPage}
         routes={routes}

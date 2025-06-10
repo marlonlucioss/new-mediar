@@ -20,6 +20,7 @@ import {
   LockClosedIcon,
 } from "@heroicons/react/24/solid";
 import {useForm} from "react-hook-form";
+import InputMask from 'react-input-mask';
 
 function formatCardNumber(value) {
   const val = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
@@ -97,8 +98,13 @@ export function Step1({ setPage, setData, requestData }) {
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
-                {...register("nome_cliente", { required: true })}
+                {...register("nome_cliente", { 
+                  required: "Nome é obrigatório.",
+                  minLength: { value: 3, message: "Nome deve ter pelo menos 3 caracteres." },
+                  pattern: { value: /^[A-Za-zÀ-ú\s]+$/, message: "Nome deve conter apenas letras e espaços." }
+                })}
               />
+              {errors.nome_cliente && <Typography variant="small" color="red" className="mt-1">{errors.nome_cliente.message}</Typography>}
             </div>
 
             <div className="mb-4 gap-4">
@@ -123,7 +129,7 @@ export function Step1({ setPage, setData, requestData }) {
               {/*    className: "before:content-none after:content-none",*/}
               {/*  }}*/}
               {/*/>*/}
-              <div className="my-4 flex items-center gap-4">
+              <div className="my-4 flex items-start gap-4">
                 <div>
                   <Typography
                     variant="small"
@@ -132,15 +138,26 @@ export function Step1({ setPage, setData, requestData }) {
                   >
                     CPF do cliente
                   </Typography>
-                  <Input
-                    type="text"
-                    placeholder="CPF"
-                    className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
-                    labelProps={{
-                      className: "before:content-none after:content-none",
-                    }}
-                    {...register("cpf_cliente", { required: true })}
-                  />
+                  <InputMask
+                    mask="999.999.999-99"
+                    {...register("cpf_cliente", { 
+                      required: "CPF é obrigatório.",
+                      pattern: { value: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/, message: "CPF inválido." }
+                    })}
+                  >
+                    {(inputProps) => (
+                      <Input
+                        {...inputProps}
+                        type="text"
+                        placeholder="CPF"
+                        className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+                        labelProps={{
+                          className: "before:content-none after:content-none",
+                        }}
+                      />
+                    )}
+                  </InputMask>
+                  {errors.cpf_cliente && <Typography variant="small" color="red" className="mt-1">{errors.cpf_cliente.message}</Typography>}
                   {/*<Input*/}
                   {/*  maxLength={5}*/}
                   {/*  value={formatExpires(cardExpires)}*/}
@@ -161,15 +178,26 @@ export function Step1({ setPage, setData, requestData }) {
                   >
                     Telefone
                   </Typography>
-                  <Input
-                    type="text"
-                    placeholder="Telefone"
-                    className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
-                    labelProps={{
-                      className: "before:content-none after:content-none",
-                    }}
-                    {...register("telefone_cliente", { required: true })}
-                  />
+                  <InputMask
+                    mask="(99) 99999-9999"
+                    {...register("telefone_cliente", { 
+                      required: "Telefone é obrigatório.",
+                      pattern: { value: /^\(\d{2}\) \d{5}-\d{4}$/, message: "Telefone inválido" }
+                    })}
+                  >
+                    {(inputProps) => (
+                      <Input
+                        {...inputProps}
+                        type="text"
+                        placeholder="Telefone"
+                        className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+                        labelProps={{
+                          className: "before:content-none after:content-none",
+                        }}
+                      />
+                    )}
+                  </InputMask>
+                  {errors.telefone_cliente && <Typography variant="small" color="red" className="mt-1">{errors.telefone_cliente.message}</Typography>}
                   {/*<Input*/}
                   {/*  maxLength={4}*/}
                   {/*  containerProps={{ className: "min-w-[72px]" }}*/}
@@ -195,8 +223,12 @@ export function Step1({ setPage, setData, requestData }) {
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
-                {...register("email_cliente", { required: true })}
+                {...register("email_cliente", { 
+                  required: "E-mail é obrigatório.",
+                  pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, message: "E-mail inválido." }
+                })}
               />
+              {errors.email_cliente && <Typography variant="small" color="red" className="mt-1">{errors.email_cliente.message}</Typography>}
             </div>
             <Button
               variant={"text"}

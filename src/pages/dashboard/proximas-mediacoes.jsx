@@ -37,6 +37,7 @@ import {Sidenav} from "@/widgets/layout/index.js";
 import routes from "@/routes.jsx";
 
 export function ProximasMediacoes() {
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(null);
   const [conciliationList, setConciliationList] = useState([])
@@ -75,25 +76,69 @@ export function ProximasMediacoes() {
   // }
 
   useEffect(() => {
-    const token = JSON.parse(localStorage.getItem('mediar')).token
-    axios.get(API_URL + `/conciliations${JSON.parse(localStorage.getItem('mediar')).user.role === 'empresa' ? '?empresa='+JSON.parse(localStorage.getItem('mediar')).user.cpfCnpj : ''}${JSON.parse(localStorage.getItem('mediar')).user.role === 'cliente' ? '?cliente='+JSON.parse(localStorage.getItem('mediar')).user.email : ''}${JSON.parse(localStorage.getItem('mediar')).user.role === 'mediador' ? '?mediador='+JSON.parse(localStorage.getItem('mediar')).user.email : ''}`, {
-      headers: {
-        authorization: 'bearer ' + token
-      }
-    })
+    const fetchConciliations = () => {
+      const token = JSON.parse(localStorage.getItem('mediar')).token;
+      axios.get(API_URL + `/conciliations${JSON.parse(localStorage.getItem('mediar')).user.role === 'empresa' ? '?empresa='+JSON.parse(localStorage.getItem('mediar')).user.cpfCnpj : ''}${JSON.parse(localStorage.getItem('mediar')).user.role === 'cliente' ? '?cliente='+JSON.parse(localStorage.getItem('mediar')).user.email : ''}${JSON.parse(localStorage.getItem('mediar')).user.role === 'mediador' ? '?mediador='+JSON.parse(localStorage.getItem('mediar')).user.email : ''}`, {
+        headers: {
+          authorization: 'bearer ' + token
+        }
+      })
       .then(function (response) {
         // handle success
-        console.log(response);
-        setConciliationList(response.data)
+        console.log('Fetched conciliations:', response.data);
+        setConciliationList(response.data);
       })
       .catch(function (error) {
         // handle error
-        console.log(error);
+        console.error('Error fetching conciliations:', error);
       })
       .finally(function () {
         // always executed
       });
+    };
+
+    fetchConciliations(); // Fetch immediately on mount
+    const intervalId = setInterval(fetchConciliations, 10000); // Fetch every 10 seconds
+
+    return () => clearInterval(intervalId); // Cleanup interval on component unmount
   }, []);
+
+  const requestSort = (key) => {
+    let direction = 'ascending';
+    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedConciliationList = React.useMemo(() => {
+    let sortableItems = [...conciliationList];
+    if (sortConfig.key !== null) {
+      sortableItems.sort((a, b) => {
+        let aValue = a[sortConfig.key];
+        let bValue = b[sortConfig.key];
+
+        // Handle nested properties like 'mediador.name'
+        if (sortConfig.key === 'mediador.name') {
+          aValue = a.mediador ? a.mediador.name : '';
+          bValue = b.mediador ? b.mediador.name : '';
+        }
+        
+        // Ensure values are strings for localeCompare, handle null/undefined
+        aValue = aValue === null || aValue === undefined ? '' : String(aValue);
+        bValue = bValue === null || bValue === undefined ? '' : String(bValue);
+
+        if (aValue.localeCompare(bValue) < 0) {
+          return sortConfig.direction === 'ascending' ? -1 : 1;
+        }
+        if (aValue.localeCompare(bValue) > 0) {
+          return sortConfig.direction === 'ascending' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return sortableItems;
+  }, [conciliationList, sortConfig]);
 
   return (
     <>
@@ -191,205 +236,132 @@ export function ProximasMediacoes() {
                 <>
                   <table className="w-full min-w-[640px] table-auto">
                     <thead style={{backgroundColor: '#DCDFE3'}}>
-                    <tr>
-                      {["horário", "cliente", "tipo de mediação", "mediador", "plataforma", "status", ""].map((el) => (
-                        <th
-                          key={el}
-                          className="border-b border-blue-gray-50 py-3 px-5 text-left"
-                        >
-                          {el === 'horário' ? (
-                            <div className="flex items-center gap-4">
-                              <div>
-                                <input id="checkbox1" type="checkbox" className="hidden peer"/>
-                                <label htmlFor="checkbox1"
-                                       className="relative flex items-center justify-center p-0.5 peer-checked:before:hidden before:block before:absolute before:w-full before:h-full before:bg-white w-5 h-5 cursor-pointer bg-blue-500 border border-gray-400 rounded overflow-hidden">
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="w-full fill-white" viewBox="0 0 520 520">
-                                    <path
-                                      d="M79.423 240.755a47.529 47.529 0 0 0-36.737 77.522l120.73 147.894a43.136 43.136 0 0 0 36.066 16.009c14.654-.787 27.884-8.626 36.319-21.515L486.588 56.773a6.13 6.13 0 0 1 .128-.2c2.353-3.613 1.59-10.773-3.267-15.271a13.321 13.321 0 0 0-19.362 1.343q-.135.166-.278.327L210.887 328.736a10.961 10.961 0 0 1-15.585.843l-83.94-76.386a47.319 47.319 0 0 0-31.939-12.438z"
-                                      data-name="7-Check" data-original="#000000"/>
-                                  </svg>
-                                </label>
-                              </div>
-                              <div>
-                                <Typography
-                                  variant="small"
-                                  className="text-[11px] font-bold uppercase text-blue-gray-400"
-                                >
+                      <tr>
+                        {["data da mediação", "cliente", "tipo de mediação", "mediador", "plataforma", "status", ""].map((el, index) => {
+                          const isCliente = el === 'cliente';
+                          const isMediador = el === 'mediador';
+                          let sortKey = null;
+                          if (isCliente) sortKey = 'mediando';
+                          if (isMediador) sortKey = 'mediador.name';
+
+                          return (
+                            <th key={el} className="border-b border-blue-gray-50 py-3 px-5 text-left">
+                              {el === 'horário' ? (
+                                <div className="flex items-center gap-4">
+                                  <div>
+                                    <input id={`checkbox-header-${index}`} type="checkbox" className="hidden peer"/>
+                                    <label htmlFor={`checkbox-header-${index}`}
+                                          className="relative flex items-center justify-center p-0.5 peer-checked:before:hidden before:block before:absolute before:w-full before:h-full before:bg-white w-5 h-5 cursor-pointer bg-blue-500 border border-gray-400 rounded overflow-hidden">
+                                      <svg xmlns="http://www.w3.org/2000/svg" className="w-full fill-white" viewBox="0 0 520 520">
+                                        <path
+                                          d="M79.423 240.755a47.529 47.529 0 0 0-36.737 77.522l120.73 147.894a43.136 43.136 0 0 0 36.066 16.009c14.654-.787 27.884-8.626 36.319-21.515L486.588 56.773a6.13 6.13 0 0 1 .128-.2c2.353-3.613 1.59-10.773-3.267-15.271a13.321 13.321 0 0 0-19.362 1.343q-.135.166-.278.327L210.887 328.736a10.961 10.961 0 0 1-15.585.843l-83.94-76.386a47.319 47.319 0 0 0-31.939-12.438z"
+                                          data-name="7-Check" data-original="#000000"/>
+                                      </svg>
+                                    </label>
+                                  </div>
+                                  <div>
+                                    <Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">
+                                      {el}
+                                    </Typography>
+                                  </div>
+                                  <div>
+                                    <i className="fa fa-arrows-v" aria-hidden="true"></i>
+                                  </div>
+                                </div>
+                              ) : (isCliente || isMediador) ? (
+                                <div className="flex items-center gap-2 cursor-pointer" onClick={() => requestSort(sortKey)}>
+                                  <Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">
+                                    {el}
+                                  </Typography>
+                                  <i className={`fa ${sortConfig.key === sortKey ? (sortConfig.direction === 'ascending' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'}`} aria-hidden="true"></i>
+                                </div>
+                              ) : (
+                                <Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">
                                   {el}
                                 </Typography>
-                              </div>
-                              <div>
-                                <i className="fa fa-arrows-v" aria-hidden="true"></i>
-                              </div>
-                            </div>
-                          ) : (
-                            <Typography
-                              variant="small"
-                              className="text-[11px] font-bold uppercase text-blue-gray-400"
-                            >
-                              {el}
-                            </Typography>
-                          )}
-                        </th>
-                      ))}
-                    </tr>
+                              )}
+                            </th>
+                          );
+                        })}
+                      </tr>
                     </thead>
                     <tbody>
-                    {conciliationList.map(
-                      ({
-                         createdAt,
-                         criadoPor,
-                         dataMediacao,
-                         horario,
-                         mediador,
-                         mediando,
-                         plataforma,
-                         status,
-                         tipoMediacao,
-                         updatedAt
-                       }, key) => {
-                        const className = `py-3 px-5 ${
-                          key === authorsTableData.length - 1
-                            ? ""
-                            : "border-b border-blue-gray-50"
-                        }`;
-
-                        return (
-                          <tr key={name}>
-                            <td className="pl-6 w-8 border-b border-blue-gray-50">
-                              <div className="flex items-center gap-4">
-                                <div>
-                                  <input id="checkbox1" type="checkbox" className="hidden peer"/>
-                                  <label htmlFor="checkbox1"
-                                         className="relative flex items-center justify-center p-0.5 peer-checked:before:hidden before:block before:absolute before:w-full before:h-full before:bg-white w-5 h-5 cursor-pointer bg-blue-500 border border-gray-400 rounded overflow-hidden">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-full fill-white" viewBox="0 0 520 520">
-                                      <path
-                                        d="M79.423 240.755a47.529 47.529 0 0 0-36.737 77.522l120.73 147.894a43.136 43.136 0 0 0 36.066 16.009c14.654-.787 27.884-8.626 36.319-21.515L486.588 56.773a6.13 6.13 0 0 1 .128-.2c2.353-3.613 1.59-10.773-3.267-15.271a13.321 13.321 0 0 0-19.362 1.343q-.135.166-.278.327L210.887 328.736a10.961 10.961 0 0 1-15.585.843l-83.94-76.386a47.319 47.319 0 0 0-31.939-12.438z"
-                                        data-name="7-Check" data-original="#000000"/>
-                                    </svg>
-                                  </label>
+                      {sortedConciliationList.map(
+                        ({ _id, createdAt, criadoPor, dataMediacao, horario, mediador, mediando, plataforma, status, tipoMediacao, updatedAt }, key) => {
+                          const className = `py-3 px-5 ${key === sortedConciliationList.length - 1 ? "" : "border-b border-blue-gray-50"}`;
+                          return (
+                            <tr key={_id || key}>
+                              <td className={className}>
+                                <Typography variant="small" color="blue-gray" className="font-semibold">
+                                  {dataMediacao ? new Date(dataMediacao).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : "A definir"}
+                                </Typography>
+                              </td>
+                              <td className={className}>
+                                <div className="flex items-center gap-4">
+                                  <div>
+                                    <Typography variant="small" color="blue-gray" className="font-semibold">
+                                      {mediando}
+                                    </Typography>
+                                  </div>
                                 </div>
-                                <div>
-                                  <Typography
-                                    variant="small"
-                                    color="blue-gray"
-                                    className="font-semibold w-24"
-                                  >
-                                    {horario}
-                                  </Typography>
-                                </div>
-                              </div>
-                            </td>
-                            <td className={className}>
-                              <div className="flex items-center gap-4">
-                                {/*<Avatar src={img} alt={name} size="sm" variant="rounded"/>*/}
-                                <div>
-                                  <Typography
-                                    variant="small"
-                                    color="blue-gray"
-                                    className="font-semibold"
-                                  >
-                                    {mediando}
-                                  </Typography>
-                                  {/*<Typography className="text-xs font-normal text-blue-gray-500">*/}
-                                  {/*  Mediador: {mediador}*/}
-                                  {/*</Typography>*/}
-                                </div>
-                              </div>
-                            </td>
-                            <td className={className}>
-                              <Typography className="text-xs font-normal text-blue-gray-500">
-                                {tipoMediacao}
-                              </Typography>
-                            </td>
-                            <td className={className}>
-                              <Typography className="text-xs font-normal text-blue-gray-500">
-                                {mediador.name}
-                              </Typography>
-                            </td>
-                            <td className={className}>
-                              <Typography className="text-xs font-normal text-blue-gray-500">
-                                <ComputerDesktopIcon style={{width: '20px'}}/>
-                              </Typography>
-                            </td>
-                            {/*<td className={className}>*/}
-                            {/*  <Chip*/}
-                            {/*    variant="gradient"*/}
-                            {/*    color={online ? "green" : "blue-gray"}*/}
-                            {/*    value={online ? "online" : "offline"}*/}
-                            {/*    className="py-0.5 px-2 text-[11px] font-medium w-fit"*/}
-                            {/*  />*/}
-                            {/*</td>*/}
-                            <td className={className}>
-                              <Typography className="text-xs font-light text-green-600">
-                                <i className="fa-regular fa-clock"></i> {status}
-                              </Typography>
-                            </td>
-                            {/*<td className={className}>*/}
-                            {/*  <Typography*/}
-                            {/*    as="a"*/}
-                            {/*    href="#"*/}
-                            {/*    className="text-xs font-semibold text-blue-gray-600"*/}
-                            {/*  >*/}
-                            {/*    Edit*/}
-                            {/*  </Typography>*/}
-                            {/*</td>*/}
-
-                            <td className={className}>
-                              {JSON.parse(localStorage.getItem('mediar')).user.role === 'cliente' && (
-                                <Popover placement="top-end">
-                                  <PopoverHandler>
-                                    <button
-                                      className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs text-gray-900 hover:bg-gray-900/10 active:bg-gray-900/20 rounded-full"
-                                      type="button">
-      <span className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"><i
-        className="fas fa-regular fa-ellipsis-vertical"
-        aria-hidden="true"></i></span>
-                                    </button>
-                                  </PopoverHandler>
-                                  <PopoverContent>
-                                    <div className="flex items-center gap-4">
+                              </td>
+                              <td className={className}>
+                                <Typography className="text-xs font-normal text-blue-gray-500">
+                                  {tipoMediacao}
+                                </Typography>
+                              </td>
+                              <td className={className}>
+                                <Typography className="text-xs font-normal text-blue-gray-500">
+                                  {mediador.name}
+                                </Typography>
+                              </td>
+                              <td className={className}>
+                                <Typography className="text-xs font-normal text-blue-gray-500">
+                                  <ComputerDesktopIcon style={{width: '20px'}}/>
+                                </Typography>
+                              </td>
+                              <td className={className}>
+                                <Typography className="text-xs font-light text-green-600">
+                                  <i className="fa-regular fa-clock"></i> {status}
+                                </Typography>
+                              </td>
+                              <td className={className}>
+                                {JSON.parse(localStorage.getItem('mediar')).user.role === 'cliente' && (
+                                  <Popover placement="top-end">
+                                    <PopoverHandler>
                                       <button
-                                        onClick={() => {
-                                          console.log(conciliationList[key])
-                                          setData(conciliationList[key])
-                                          setPage('step1Cliente')
-                                        }}
-                                        className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs shadow-md shadow-gray-900/10 hover:shadow-lg focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded bg-[#fff] text-blue-600"
+                                        className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs text-gray-900 hover:bg-gray-900/10 active:bg-gray-900/20 rounded-full"
                                         type="button">
-      <span
-        className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"><i
-        className="text-lg fa-solid fa-calendar"
-        aria-hidden="true"></i></span></button>
-
-                                      {/*                        <button*/}
-                                      {/*                          className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs shadow-md shadow-gray-900/10 hover:shadow-lg focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded bg-[#fff] text-red-600"*/}
-                                      {/*                          type="button">*/}
-                                      {/*<span*/}
-                                      {/*  className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"><i*/}
-                                      {/*  className="text-lg fa-solid fa-trash-can"*/}
-                                      {/*  aria-hidden="true"></i></span></button>*/}
-                                      {/*                        <button*/}
-                                      {/*                          className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs shadow-md shadow-gray-900/10 hover:shadow-lg focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded bg-[#fff] text-gray-700"*/}
-                                      {/*                          type="button">*/}
-                                      {/*<span*/}
-                                      {/*  className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"><i*/}
-                                      {/*  className="text-lg fa-solid fa-pen-to-square" aria-hidden="true"></i></span></button>*/}
-                                      {/*                        <button*/}
-                                      {/*                          className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs shadow-md shadow-gray-900/10 hover:shadow-lg focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded bg-[#fff] text-gray-700"*/}
-                                      {/*                          type="button">*/}
-                                      {/*<span*/}
-                                      {/*  className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"><i*/}
-                                      {/*  className="text-lg fa-solid fa-repeat" aria-hidden="true"></i></span></button>*/}
-                                    </div>
-                                  </PopoverContent>
-                                </Popover>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      }
-                    )}
+                                        <span className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"><i
+                                          className="fas fa-regular fa-ellipsis-vertical"
+                                          aria-hidden="true"></i></span>
+                                      </button>
+                                    </PopoverHandler>
+                                    <PopoverContent>
+                                      <div className="flex items-center gap-4">
+                                        <button
+                                          onClick={() => {
+                                            const currentItem = sortedConciliationList[key]; // Use sorted list
+                                            console.log(currentItem)
+                                            setData(currentItem)
+                                            setPage('step1Cliente')
+                                          }}
+                                          className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs shadow-md shadow-gray-900/10 hover:shadow-lg focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded bg-[#fff] text-blue-600"
+                                          type="button">
+                                          <span
+                                            className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"><i
+                                            className="text-lg fa-solid fa-calendar"
+                                            aria-hidden="true"></i></span></button>
+                                        {/* Other buttons from original code can be added here if needed */}
+                                      </div>
+                                    </PopoverContent>
+                                  </Popover>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        }
+                      )}
                     </tbody>
                   </table>
                   {/*<Pagination />*/}

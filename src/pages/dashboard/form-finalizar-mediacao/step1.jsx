@@ -83,7 +83,7 @@ export function Step1Cliente({ setPage, setData, requestData }) {
         </CardHeader>
         <CardBody>
           <form className="flex flex-col" onSubmit={handleSubmit(onSubmit)}>
-            <div>
+            <div className="mb-2.5">
               <Typography
                 variant="small"
                 color="blue-gray"

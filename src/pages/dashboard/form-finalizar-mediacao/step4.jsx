@@ -176,6 +176,7 @@ export function Step4Cliente({ setPage, setData, requestData }) {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
   const [selectedDay, setSelectedDay] = useState(new Date().getDate())
   const [selectedHour, setSelectedHour] = useState()
+  const [isLoading, setIsLoading] = useState(false);
 
   const selectDateTime = () => {
     console.log(selectedMonth)
@@ -191,7 +192,28 @@ export function Step4Cliente({ setPage, setData, requestData }) {
     console.log(requestData)
   }, [requestData]);
 
-  const  callCreateConciliation = () => {
+const removeKeyRecursively = (obj, keyToRemove) => {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(item => removeKeyRecursively(item, keyToRemove));
+  }
+
+  const newObj = {};
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      if (key !== keyToRemove) {
+        newObj[key] = removeKeyRecursively(obj[key], keyToRemove);
+      }
+    }
+  }
+  return newObj;
+};
+
+  const callCreateConciliation = async () => {
+    setIsLoading(true);
     console.log('step4cliente', {
       horario: `${selectedHour[0]}${selectedHour[1]}:${selectedHour[2]}0 - 1${selectedHour[2] === '3' ? parseInt(selectedHour[1]) + 1 : selectedHour[1]}:${selectedHour[2] === '0' ? 3 : 0}0`,
       status: 'agendada',
@@ -201,12 +223,13 @@ export function Step4Cliente({ setPage, setData, requestData }) {
     selectDateTime()
     console.log(`${selectedHour[0]}${selectedHour[1]}:${selectedHour[2]}0 - 1${selectedHour[2] === '3' ? parseInt(selectedHour[1]) + 1 : selectedHour[1]}:${selectedHour[2] === '0' ? 3 : 0}0`)
     console.log(`2024-${selectedMonth + 1}-${selectedDay}`)
+    const cleanedRequestData = removeKeyRecursively(requestData, 'profileImageFile');
     const token = JSON.parse(localStorage.getItem('mediar')).token
     axios.put(API_URL + '/conciliations', {
-      ...requestData,
+      ...cleanedRequestData,
       horario: `${selectedHour[0]}${selectedHour[1]}:${selectedHour[2]}0 - 1${selectedHour[2] === '3' ? parseInt(selectedHour[1]) + 1 : selectedHour[1]}:${selectedHour[2] === '0' ? 3 : 0}0`,
       status: 'agendada',
-      dataMediacao: `2024-${selectedMonth + 1}-${selectedDay}`,
+      dataMediacao: `${new Date().getFullYear()}-${selectedMonth + 1}-${selectedDay}`,
     }, {
       headers: {
         authorization: 'bearer ' + token
@@ -214,15 +237,15 @@ export function Step4Cliente({ setPage, setData, requestData }) {
     })
       .then(function (response) {
         // handle success
-        setPage('step5Cliente')
-        console.log(response);
+        setPage('step5Cliente');
+        console.log('Conciliation created/updated successfully:', response);
       })
       .catch(function (error) {
         // handle error
-        console.log(error);
+        console.error('Error during conciliation creation/update:', error);
       })
-      .finally(function () {
-        // always executed
+      .finally(() => {
+        setIsLoading(false);
       });
   }
 
@@ -243,13 +266,10 @@ export function Step4Cliente({ setPage, setData, requestData }) {
                 />
                 <div className="pt-8 pl-3">
                   <Typography variant="h5" color="blue-gray" className="mb-1">
-                    Andrea Maia
+                    {requestData.mediador.name}
                   </Typography>
-                  <Typography
-                    variant="small"
-                    className="font-normal text-blue-gray-600"
-                  >
-                    Mediação familiar
+                  <Typography variant="small" color="blue-gray" className="mb-1">
+                    {requestData.mediador.email}
                   </Typography>
                 </div>
               </div>
@@ -377,16 +397,21 @@ export function Step4Cliente({ setPage, setData, requestData }) {
               className="flex items-center gap-4 px-4 capitalize"
               fullWidth
               style={{backgroundColor: '#11afe4', placeContent: 'center'}}
+              loading={isLoading}
+              disabled={isLoading}
               onClick={() => {
                 callCreateConciliation()
               }}
             >
-              <Typography
-                color="inherit"
-                className="font-medium capitalize"
-              >
-                Próxima etapa
-              </Typography>
+              {isLoading ? (
+                <Typography color="inherit" className="font-medium capitalize">
+                  Processando...
+                </Typography>
+              ) : (
+                <Typography color="inherit" className="font-medium capitalize">
+                  Próxima etapa
+                </Typography>
+              )}
             </Button>
           </div>
         </CardBody>

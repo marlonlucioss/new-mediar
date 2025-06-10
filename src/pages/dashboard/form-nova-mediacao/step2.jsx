@@ -94,13 +94,14 @@ export function Step2({ setPage, setData, requestData }) {
               <Input
                 type='text'
                 name="numero_processo"
-                placeholder="Nome do cliente"
+                placeholder="Número do processo"
                 className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
-                {...register("numero_processo", { required: true })}
+                {...register("numero_processo", { required: "Número do processo é obrigatório." })}
               />
+              {errors.numero_processo && <Typography variant="small" color="red" className="mt-1">{errors.numero_processo.message}</Typography>}
             </div>
 
             <div className="mb-4 gap-4">
@@ -191,13 +192,14 @@ export function Step2({ setPage, setData, requestData }) {
               <Input
                 type='text'
                 name="objeto_disputa"
-                placeholder="name@mail.com"
+                placeholder="Descreva o objeto da disputa"
                 className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
-                {...register("objeto_disputa", { required: true })}
+                {...register("objeto_disputa", { required: "Objeto da disputa é obrigatório." })}
               />
+              {errors.objeto_disputa && <Typography variant="small" color="red" className="mt-1">{errors.objeto_disputa.message}</Typography>}
             </div>
             <div className="mb-4 gap-4">
               <Typography
@@ -210,13 +212,14 @@ export function Step2({ setPage, setData, requestData }) {
               <Input
                 type="text"
                 name="resumo_disputa"
-                placeholder="Nome do cliente"
+                placeholder="Resuma a disputa"
                 className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
-                {...register("resumo_disputa", { required: true })}
+                {...register("resumo_disputa", { required: "Resumo da disputa é obrigatório." })}
               />
+              {errors.resumo_disputa && <Typography variant="small" color="red" className="mt-1">{errors.resumo_disputa.message}</Typography>}
             </div>
             <Button
               variant={"text"}

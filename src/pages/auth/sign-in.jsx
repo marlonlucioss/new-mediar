@@ -41,8 +41,9 @@ export function SignIn() {
       password: data.password,
     })
       .then(function (response) {
+        console.log(({...response.data, profileImageFile: null}))
         // handle success
-        localStorage.setItem("mediar",JSON.stringify(response.data))
+        localStorage.setItem("mediar",JSON.stringify({...response.data, user: {...response.data.user, profileImageFile: null}}))
         navigate("/dashboard/home");
         console.log(response);
       })
@@ -70,20 +71,50 @@ export function SignIn() {
       cpfCnpj: data.cpfCnpj,
       telefone: data.telefone,
       role: data.role,
-      password: data.password})
-      .then(function (response) {
-        // handle success
-        localStorage.setItem("mediar",JSON.stringify(response.data))
+      password: data.password
+    })
+    .then(function (response) {
+      // handle success
+      console.log("Signup API response.data:", response.data);
+      const responseDataString = JSON.stringify(response.data);
+      console.log("Stringified response.data length:", responseDataString.length);
+
+      // It's highly recommended to only store essential data (e.g., token, user ID)
+      // instead of the entire response.data if it's large.
+
+      if (responseDataString.length > 4 * 1024 * 1024) { // Example: Check if > 4MB, adjust as needed
+        console.warn("Warning: response.data is very large (", responseDataString.length, " bytes). Storing only essential parts is strongly recommended to avoid QuotaExceededError.");
+      }
+
+      try {
+        localStorage.setItem("mediar", {...responseDataString, profileImageFile: null});
+        console.log("'mediar' successfully set in localStorage.");
         navigate("/dashboard/home");
-        console.log(response);
-      })
-      .catch(function (error) {
-        // handle error
-        console.log(error);
-      })
-      .finally(function () {
-        // always executed
-      });
+      } catch (e) {
+        if (e.name === 'QuotaExceededError') {
+          console.error("QuotaExceededError: Failed to set 'mediar' in localStorage because the data is too large.");
+          console.error("Data that was too large:", response.data); // Log the problematic data
+          // Consider providing user feedback or attempting to store a smaller subset of data
+          alert("Failed to save your session information because it's too large. Please contact support if this issue persists.");
+        } else {
+          console.error("An unexpected error occurred while trying to save to localStorage:", e);
+        }
+      }
+      // console.log(response); // Original console.log(response) can be kept or removed if it's now redundant with more specific logging
+    })
+    .catch(function (error) {
+      // handle error
+      console.error("Signup API error:", error.response ? error.response.data : error.message);
+      if (error.response && error.response.data && error.response.data.message) {
+        alert("Signup failed: " + error.response.data.message);
+      } else {
+        alert("Signup failed. Please check your details and try again.");
+      }
+    })
+    .finally(function () {
+      // always executed
+      console.log("Signup API call finished.");
+    });
   }
 
   useEffect(() => {
