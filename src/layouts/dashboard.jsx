@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import { Cog6ToothIcon } from "@heroicons/react/24/solid";
 import { IconButton, Dialog, DialogHeader, DialogBody, DialogFooter, Button as MTButton } from "@material-tailwind/react";
 import {
@@ -9,7 +9,7 @@ import {
 } from "@/widgets/layout";
 import routes from "@/routes";
 import { useMaterialTailwindController, setOpenConfigurator } from "@/context";
-import {JSX, useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import ListaMediadores from "@/pages/dashboard/listaMediadores.jsx";
 import OverviewMediador from "@/pages/dashboard/overviewMediador.jsx";
 import ScheduleMediador from "@/pages/dashboard/scheduleMediador.jsx";
@@ -26,6 +26,7 @@ import {Step2Cliente} from "@/pages/dashboard/form-finalizar-mediacao/step2.jsx"
 import {Step1Cliente} from "@/pages/dashboard/form-finalizar-mediacao/step1.jsx";
 
 export function Dashboard() {
+  const navigate = useNavigate();
   const [controller, dispatch] = useMaterialTailwindController();
   const { sidenavType } = controller;
   const [page, setPage] = useState(null);
@@ -33,6 +34,14 @@ export function Dashboard() {
   const [data, setData] = useState({});
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    const mediarData = localStorage.getItem('mediar');
+    if (!mediarData) {
+      navigate('/auth/sign-in');
+      return;
+    }
+  }, []);
 
   const  callCreateConciliation = () => {
     const token = JSON.parse(localStorage.getItem('mediar')).token
@@ -77,12 +86,12 @@ export function Dashboard() {
       .then(function (response) {
         // handle success
         setPage('step4')
-        console.log(response);
+
         setLoading(false)
       })
       .catch(function (error) {
         // handle error
-        console.log(error);
+
         setErrorMessage("Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.");
         setIsErrorModalOpen(true);
         setLoading(false)
@@ -151,21 +160,7 @@ export function Dashboard() {
         { page === 'step4' && (
           <SuccessScheduling setPage={setPage} setData={setData} requestData={data} />
         )}
-        {/*{ page === 'step1Cliente' && (*/}
-        {/*  <Step1Cliente setPage={setPage} setData={setData} requestData={data} />*/}
-        {/*)}*/}
-        {/*{ page === 'step2Cliente' && (*/}
-        {/*  <Step2Cliente setPage={setPage} setData={setData} requestData={data} />*/}
-        {/*)}*/}
-        {/*{ page === 'step3Cliente' && (*/}
-        {/*  <Step3Cliente setPage={setPage} setData={setData} requestData={data} callCreateConciliation={callCreateConciliation} loading={loading} />*/}
-        {/*)}*/}
-        {/*{ page === 'step4Cliente' && (*/}
-        {/*  <Step4Cliente setPage={setPage} setData={setData} requestData={data} callCreateConciliation={callCreateConciliation} loading={loading} />*/}
-        {/*)}*/}
-        {/*{ page === 'step5Cliente' && (*/}
-        {/*  <SuccessSchedulingCliente setPage={setPage} setData={setData} requestData={data} />*/}
-        {/*)}*/}
+
         <div className="text-blue-gray-600">
           <Footer />
         </div>

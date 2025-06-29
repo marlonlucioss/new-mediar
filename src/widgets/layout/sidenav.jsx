@@ -1,3 +1,4 @@
+import React from "react";
 import PropTypes from "prop-types";
 import { Link, NavLink } from "react-router-dom";
 import {PlusIcon, XMarkIcon} from "@heroicons/react/24/outline";
@@ -36,7 +37,7 @@ export function Sidenav({ brandImg, brandName, routes, setPage }) {
             <MainLogo style={{ display: 'inline' }} />
           </Typography>
         </Link>
-        {JSON.parse(localStorage.getItem('mediar')).user.role === 'empresa' && (
+        {localStorage.getItem('mediar') && JSON.parse(localStorage.getItem('mediar'))?.user?.role === 'empresa' && (
           <div className="m-8">
             <Button
               variant={"text"}
@@ -68,10 +69,10 @@ export function Sidenav({ brandImg, brandName, routes, setPage }) {
         </IconButton>
       </div>
       <div className="m-4">
-        {routes.map(({ layout, title, pages }, key) => (
-          <>
+        {routes.filter(route => route.layout === 'dashboard').map(({ layout, title, pages }, key) => (
+          <React.Fragment key={`route-${key}`}>
             {key > 0 && <hr/>}
-            <ul key={key} className="mb-4 flex flex-col gap-1">
+            <ul className="mb-4 flex flex-col gap-1">
               {title && (
                 <li className="mx-3.5 mt-4 mb-2">
                   <Typography
@@ -106,7 +107,7 @@ export function Sidenav({ brandImg, brandName, routes, setPage }) {
                 </li>
               ))}
             </ul>
-          </>
+          </React.Fragment>
         ))}
       </div>
     </aside>
@@ -124,6 +125,6 @@ Sidenav.propTypes = {
   routes: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
-Sidenav.displayName = "/src/widgets/layout/sidnave.jsx";
+Sidenav.displayName = "/src/widgets/layout/sidenav.jsx";
 
 export default Sidenav;

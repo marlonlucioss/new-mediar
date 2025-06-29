@@ -17,8 +17,9 @@ import {
   ChatBubbleLeftEllipsisIcon,
   Cog6ToothIcon,
   PencilIcon,
+  ArrowPathIcon,
 } from "@heroicons/react/24/solid";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ProfileInfoCard, MessageCard } from "@/widgets/cards";
 import {platformSettingsData, conversationsData, projectsData, ordersOverviewData, authorsTableData} from "@/data";
 import {StarIcon} from "@heroicons/react/24/solid/index.js";
@@ -28,21 +29,22 @@ import Pagination from "@/components/pagination.jsx";
 import {ChevronLeftIcon, ChevronRightIcon} from "@heroicons/react/20/solid";
 import axios from "axios";
 import {API_URL} from "@/config.js";
-import {Step1Cliente} from "@/pages/dashboard/form-finalizar-mediacao/step1.jsx";
+import { Step1Cliente } from "@/pages/dashboard/form-finalizar-mediacao/step1.jsx";
 import {Step2Cliente} from "@/pages/dashboard/form-finalizar-mediacao/step2.jsx";
 import Step3Cliente from "@/pages/dashboard/form-finalizar-mediacao/step3.jsx";
 import Step4Cliente from "@/pages/dashboard/form-finalizar-mediacao/step4.jsx";
 import SuccessSchedulingCliente from "@/pages/dashboard/successSchedulingCliente.jsx";
 import {Sidenav} from "@/widgets/layout/index.js";
 import routes from "@/routes.jsx";
+import { useMediacaoData } from "@/hooks/useMediacaoData";
 
-export function ProximasMediacoes() {
+function ProximasMediacoes() {
+  const navigate = useNavigate();
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
-  const [page, setPage] = useState(null);
-  const [loading, setLoading] = useState(null);
-  const [conciliationList, setConciliationList] = useState([])
-
-  const [data, setData] = useState({});
+  const [loading, setLoading] = useState(false);
+  const { data: requestData, updateData, clearData, navigateToStep } = useMediacaoData();
+  const [conciliationList, setConciliationList] = useState([]);
+  const [page, setPage] = useState(null)
 
   // const  callCreateConciliation = () => {
   //   const token = JSON.parse(localStorage.getItem('mediar')).token
@@ -64,20 +66,53 @@ export function ProximasMediacoes() {
   //     .then(function (response) {
   //       // handle success
   //       setPage('step5Cliente')
-  //       console.log(response);
   //     })
   //     .catch(function (error) {
   //       // handle error
-  //       console.log(error);
   //     })
   //     .finally(function () {
   //       // always executed
   //     });
   // }
 
-  useEffect(() => {
-    const fetchConciliations = () => {
-      const token = JSON.parse(localStorage.getItem('mediar')).token;
+  const deleteConciliation = async (id) => {
+    try {
+      const mediarData = JSON.parse(localStorage.getItem('mediar'));
+      
+      if (!mediarData?.token || !id) {
+        alert('Erro ao identificar a mediação.');
+        return;
+      }
+  
+      const response = await axios.put(
+        `${API_URL}/conciliations/${id}/cancel`,
+        {},
+        {
+          headers: {
+            authorization: `bearer ${mediarData.token}`
+          }
+        }
+      );
+  
+      if (response.status === 200) {
+        alert('Mediação cancelada com sucesso!');
+        fetchConciliations();
+      }
+    } catch (error) {
+      console.error('Error canceling conciliation:', error);
+      alert('Erro ao cancelar mediação. Por favor, tente novamente.');
+    }
+  }
+
+  const fetchConciliations = async () => {
+    setLoading(true);
+    try {
+      const mediarData = localStorage.getItem('mediar');
+      if (!mediarData) {
+        navigate('/auth/sign-in');
+        return;
+      }
+      const token = JSON.parse(mediarData).token;
       axios.get(API_URL + `/conciliations${JSON.parse(localStorage.getItem('mediar')).user.role === 'empresa' ? '?empresa='+JSON.parse(localStorage.getItem('mediar')).user.cpfCnpj : ''}${JSON.parse(localStorage.getItem('mediar')).user.role === 'cliente' ? '?cliente='+JSON.parse(localStorage.getItem('mediar')).user.email : ''}${JSON.parse(localStorage.getItem('mediar')).user.role === 'mediador' ? '?mediador='+JSON.parse(localStorage.getItem('mediar')).user.email : ''}`, {
         headers: {
           authorization: 'bearer ' + token
@@ -85,7 +120,7 @@ export function ProximasMediacoes() {
       })
       .then(function (response) {
         // handle success
-        console.log('Fetched conciliations:', response.data);
+
         setConciliationList(response.data);
       })
       .catch(function (error) {
@@ -95,12 +130,15 @@ export function ProximasMediacoes() {
       .finally(function () {
         // always executed
       });
-    };
+    } catch (error) {
+      console.error('Error fetching conciliations:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchConciliations(); // Fetch immediately on mount
-    const intervalId = setInterval(fetchConciliations, 10000); // Fetch every 10 seconds
-
-    return () => clearInterval(intervalId); // Cleanup interval on component unmount
   }, []);
 
   const requestSort = (key) => {
@@ -148,11 +186,11 @@ export function ProximasMediacoes() {
             <CardHeader className='m-0 shadow-none'>
               <div>
                 {/* Code block starts */}
-                <div className="w-full mt-12 mb-3 mx-auto flex flex-col md:flex-row items-start md:items-center justify-between pb-4">
-                  <div>
+                <div className="w-full mt-12 mb-3 mx-auto flex flex-col md:flex-row items-center justify-between pb-4">
+                  <div className="mb-4 md:mb-0">
                     <h4 className="text-3xl font-normal leading-tight text-gray-800 dark:text-gray-100">Minhas Mediações</h4>
                   </div>
-                  <div className='w-5/12'></div>
+                  
                   {/*<div className="mt-6 md:mt-0 flex items-center">*/}
                   {/*  <Button*/}
                   {/*    variant={"filled"}*/}
@@ -221,8 +259,19 @@ export function ProximasMediacoes() {
                   {/*</div>*/}
                   {/* Code block ends */}
                 </div>
+                
               </div>
             </CardHeader>
+            <div className="flex justify-end px-4">
+              <Button
+                variant="text"
+                size="sm"
+                onClick={fetchConciliations}
+                className="flex items-center justify-center gap-2"
+              >
+                <ArrowPathIcon className={`h-4 w-4 my-auto transition-transform ${loading ? 'animate-spin' : ''}`} /> <span className="my-auto">Atualizar</span>
+              </Button>
+            </div>
             <CardBody className="px-0 pt-0 pb-0">
               {conciliationList.length === 0 &&
                 <Typography
@@ -287,13 +336,13 @@ export function ProximasMediacoes() {
                     </thead>
                     <tbody>
                       {sortedConciliationList.map(
-                        ({ _id, createdAt, criadoPor, dataMediacao, horario, mediador, mediando, plataforma, status, tipoMediacao, updatedAt }, key) => {
-                          const className = `py-3 px-5 ${key === sortedConciliationList.length - 1 ? "" : "border-b border-blue-gray-50"}`;
+                        ({ _id, createdAt, criadoPor, dataMediacao, horario, mediador, mediando, plataforma, status, tipoMediacao, updatedAt }, index) => {
+                          const className = `py-3 px-5 ${index === sortedConciliationList.length - 1 ? "" : "border-b border-blue-gray-50"}`;
                           return (
-                            <tr key={_id || key}>
+                            <tr key={_id || index}>
                               <td className={className}>
                                 <Typography variant="small" color="blue-gray" className="font-semibold">
-                                  {dataMediacao ? new Date(dataMediacao).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : "A definir"}
+                                  {dataMediacao ? new Date(dataMediacao).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : "A definir"} - {horario}
                                 </Typography>
                               </td>
                               <td className={className}>
@@ -321,12 +370,25 @@ export function ProximasMediacoes() {
                                 </Typography>
                               </td>
                               <td className={className}>
-                                <Typography className="text-xs font-light text-green-600">
-                                  <i className="fa-regular fa-clock"></i> {status}
+                                <Typography 
+                                  className="text-xs font-bold"
+                                  style={{
+                                    color: status === 'aguardando' ? '#3c91db' :
+                                           status === 'agendada' ? '#d5ab0a' :
+                                           status === 'realizada' ? '#449129' :
+                                           status === 'cancelada' ? '#b74c4c' : '#000',
+                                  }}
+                                >
+                                  <i className={
+                                    status === 'aguardando' ? 'fa-regular fa-clock' :
+                                    status === 'agendada' ? 'fa-solid fa-check' :
+                                    status === 'realizada' ? 'fa-solid fa-thumbs-up' :
+                                    status === 'cancelada' ? 'fa-solid fa-xmark' : 'fa-regular fa-clock'
+                                  }></i> {status}
                                 </Typography>
                               </td>
                               <td className={className}>
-                                {JSON.parse(localStorage.getItem('mediar')).user.role === 'cliente' && (
+                                {JSON.parse(localStorage.getItem('mediar')).user.role === 'cliente' && status === 'aguardando' && (
                                   <Popover placement="top-end">
                                     <PopoverHandler>
                                       <button
@@ -341,16 +403,82 @@ export function ProximasMediacoes() {
                                       <div className="flex items-center gap-4">
                                         <button
                                           onClick={() => {
-                                            const currentItem = sortedConciliationList[key]; // Use sorted list
-                                            console.log(currentItem)
-                                            setData(currentItem)
-                                            setPage('step1Cliente')
+                                            // Clear mediation data from context
+                                            clearData();
+                                            
+                                            // Get current item from sorted list
+                                            const currentItem = sortedConciliationList[index];
+                                            console.log(currentItem);
+                                            // Update with fresh data
+                                            setTimeout(() => {
+                                              updateData(currentItem);
+                                              navigateToStep('step1');
+                                            }, 1000);
                                           }}
                                           className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs shadow-md shadow-gray-900/10 hover:shadow-lg focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded bg-[#fff] text-blue-600"
                                           type="button">
                                           <span
                                             className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"><i
                                             className="text-lg fa-solid fa-calendar"
+                                            aria-hidden="true"></i></span></button>
+                                        {/* Other buttons from original code can be added here if needed */}
+                                      </div>
+                                    </PopoverContent>
+                                  </Popover>
+                                )}
+                                {JSON.parse(localStorage.getItem('mediar')).user.role === 'empresa' && status === 'aguardando' && (
+                                  <Popover placement="top-end">
+                                    <PopoverHandler>
+                                      <button
+                                        className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs text-gray-900 hover:bg-gray-900/10 active:bg-gray-900/20 rounded-full"
+                                        type="button">
+                                        <span className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"><i
+                                          className="fas fa-regular fa-ellipsis-vertical"
+                                          aria-hidden="true"></i></span>
+                                      </button>
+                                    </PopoverHandler>
+                                    <PopoverContent>
+                                      <div className="flex items-center gap-4">
+                                        <button
+                                          onClick={() => {
+                                            const currentItem = sortedConciliationList[index]; // Use sorted list
+
+                                            deleteConciliation(currentItem._id);
+                                          }}
+                                          className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs shadow-md shadow-gray-900/10 hover:shadow-lg focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded bg-[#fff] text-red-600"
+                                          type="button">
+                                          <span
+                                            className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"><i
+                                            className="text-lg fa-solid fa-close"
+                                            aria-hidden="true"></i></span></button>
+                                        {/* Other buttons from original code can be added here if needed */}
+                                      </div>
+                                    </PopoverContent>
+                                  </Popover>
+                                )}
+                                {JSON.parse(localStorage.getItem('mediar')).user.role === 'mediador' && status === 'agendada' && (
+                                  <Popover placement="top-end">
+                                    <PopoverHandler>
+                                      <button
+                                        className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs text-gray-900 hover:bg-gray-900/10 active:bg-gray-900/20 rounded-full"
+                                        type="button">
+                                        <span className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"><i
+                                          className="fas fa-regular fa-ellipsis-vertical"
+                                          aria-hidden="true"></i></span>
+                                      </button>
+                                    </PopoverHandler>
+                                    <PopoverContent>
+                                      <div className="flex items-center gap-4">
+                                      <button
+                                          onClick={() => {
+                                            const currentItem = sortedConciliationList[index];
+                                            deleteConciliation(currentItem._id);
+                                          }}
+                                          className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs shadow-md shadow-gray-900/10 hover:shadow-lg focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded bg-[#fff] text-red-600"
+                                          type="button">
+                                          <span
+                                            className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"><i
+                                            className="text-lg fa-solid fa-close"
                                             aria-hidden="true"></i></span></button>
                                         {/* Other buttons from original code can be added here if needed */}
                                       </div>
@@ -371,25 +499,6 @@ export function ProximasMediacoes() {
           </Card>
         </Card>
       )}
-      <Card className='w-full shadow-none'>
-        <Card className='w-full shadow-none'>
-          { page === 'step1Cliente' && (
-            <Step1Cliente setPage={setPage} setData={setData} requestData={data} />
-          )}
-          { page === 'step2Cliente' && (
-            <Step2Cliente setPage={setPage} setData={setData} requestData={data} />
-          )}
-          { page === 'step3Cliente' && (
-            <Step3Cliente setPage={setPage} setData={setData} requestData={data} />
-          )}
-          { page === 'step4Cliente' && (
-            <Step4Cliente setPage={setPage} setData={setData} requestData={data} />
-          )}
-          { page === 'step5Cliente' && (
-            <SuccessSchedulingCliente setPage={setPage} setData={setData} requestData={data} />
-          )}
-        </Card>
-      </Card>
     </>
   )
 }

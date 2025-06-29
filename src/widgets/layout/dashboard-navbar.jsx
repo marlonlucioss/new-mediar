@@ -51,7 +51,7 @@ export function DashboardNavbar() {
               authorization: `bearer ${token}`,
             },
           });
-          console.log(response)
+
           if (response.data) {
             setAvatarSrc(response.data.profileImageFile);
           }
@@ -69,7 +69,7 @@ export function DashboardNavbar() {
 
   const callLogout = () => {
     localStorage.removeItem('mediar')
-    setTimeout(() => navigate("/auth/sign-in"), 1000)
+    setTimeout(() => navigate("/"), 1000)
   }
 
   return (
@@ -108,7 +108,7 @@ export function DashboardNavbar() {
           {/*  </Typography>*/}
           {/*</Breadcrumbs>*/}
           <Typography variant="h3" color="blue-gray">
-            Olá {JSON.parse(localStorage.getItem('mediar')).user.name}
+            Olá {localStorage.getItem('mediar') && JSON.parse(localStorage.getItem('mediar'))?.user?.name || 'Usuário'}
             {/*{page}*/}
           </Typography>
           <Typography variant="small" color="gray" className='normal-case'>
@@ -120,7 +120,7 @@ export function DashboardNavbar() {
             <MenuHandler>
               <IconButton variant="text" color="blue-gray" className='Menu-IconButton-Avatar'>
                 <Avatar
-                  src={avatarSrc}
+                  src={avatarSrc || '/img/image.png'}
                   alt='Andrea Maia'
                   variant="rounded"
                   className="menu-avatar"

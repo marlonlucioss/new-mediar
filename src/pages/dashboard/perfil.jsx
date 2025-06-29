@@ -18,7 +18,7 @@ import {
   Cog6ToothIcon,
   PencilIcon,
 } from "@heroicons/react/24/solid";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ProfileInfoCard, MessageCard } from "@/widgets/cards";
 import {platformSettingsData, conversationsData, projectsData, ordersOverviewData, authorsTableData} from "@/data";
 import {StarIcon} from "@heroicons/react/24/solid/index.js";
@@ -101,7 +101,16 @@ const handleEventClick = (selected) => {
 };
 
 export function Perfil({ setPage }) {
-  const [data, setData] = useState(JSON.parse(localStorage.getItem('mediar'))?.user || {});
+  const navigate = useNavigate();
+  const mediarData = localStorage.getItem('mediar');
+  const [data, setData] = useState(mediarData ? JSON.parse(mediarData)?.user || {} : {});
+
+  useEffect(() => {
+    if (!mediarData) {
+      navigate('/auth/sign-in');
+      return;
+    }
+  }, []);
   const [profileImage, setProfileImage] = useState('');
 
   const handleProfileImageUpdate = (newImageUrl) => {
@@ -129,13 +138,13 @@ export function Perfil({ setPage }) {
 
   const updateUserSession = (user) => {
     let userSession = JSON.parse(localStorage.getItem('mediar'))
-    userSession = {...userSession, user: {...user, profileImageFile: null}}
+    userSession = {...userSession, user: {...user}}
     localStorage.setItem("mediar",JSON.stringify(userSession))
   }
 
   useEffect(() => {
     if (!data || Object.keys(data).length === 0 || !data._id) { // Guard against empty/incomplete data
-      console.log("Skipping API call due to incomplete data state.");
+
       return;
     }
     let authToken = '';
@@ -156,7 +165,7 @@ export function Perfil({ setPage }) {
     if (data.profileImageUrl && data.profileImageUrl.startsWith('data:image/')) {
       const imageBlob = dataURLtoBlob(data.profileImageUrl);
       if (imageBlob) {
-        console.log("Preparing image for upload.");
+
         const formData = new FormData();
         formData.append('profileImageFile', imageBlob, `profile-${data.id}.png`); // Example filename
         // Append other data fields to FormData
@@ -184,11 +193,11 @@ export function Perfil({ setPage }) {
       finalConfig.headers['Content-Type'] = 'application/json';
     }
 
-    console.log("Sending update to API with payload:", finalPayload);
+
     axios.put(API_URL + '/users', finalPayload, finalConfig)
       .then(function (response) {
         // handle success
-        console.log('API Update successful, response data:', response.data);
+
         updateUserSession(response.data); // Update localStorage
         setProfileImage(response.data.profileImageFile)
         // setData(response.data)

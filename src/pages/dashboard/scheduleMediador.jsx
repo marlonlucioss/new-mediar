@@ -177,9 +177,7 @@ export function ScheduleMediador({ setPage, setData, data }) {
   const [selectedHour, setSelectedHour] = useState()
 
   const selectDateTime = () => {
-    console.log(selectedMonth)
-    console.log(selectedDay)
-    console.log(selectedHour)
+
   }
 
   useEffect(() => {
@@ -206,11 +204,9 @@ export function ScheduleMediador({ setPage, setData, data }) {
   //     .then(function (response) {
   //       // handle success
   //       setPage('sucesso-agendamento')
-  //       console.log(response);
   //     })
   //     .catch(function (error) {
   //       // handle error
-  //       console.log(error);
   //     })
   //     .finally(function () {
   //       // always executed
@@ -284,8 +280,8 @@ export function ScheduleMediador({ setPage, setData, data }) {
                   className="font-normal text-blue-gray-500"
                 >
                   <ButtonGroup className="gap-3 p-1" style={{flexFlow: 'wrap', justifyContent: 'space-between', columnGap: 'normal'}}>
-                    { meses.map((mes) => {
-                      return <Button disabled={mes.value < new Date().getMonth()} onClick={() => {
+                    { meses.map((mes, index) => {
+                      return <Button key={mes.value} disabled={mes.value < new Date().getMonth()} onClick={() => {
                         setDays(getDaysInMonth(mes.value))
                         setSelectedMonth(mes.value)
                       }} className="rounded mediar360-bt" style={{width: '115px', backgroundColor: `${selectedMonth === mes.value ? 'rgb(17, 175, 228)' : 'white'}`, color: `${selectedMonth === mes.value ? 'white' : 'rgb(17, 175, 228)'}`, border: '1px solid rgb(17, 175, 228)'}}>{mes.label}</Button>
@@ -314,8 +310,8 @@ export function ScheduleMediador({ setPage, setData, data }) {
                 className="font-normal text-blue-gray-500"
               >
                 <ButtonGroup className="gap-1 p-1" style={{flexWrap: 'wrap', justifyContent: 'space-between', columnGap: 'normal'}}>
-                  { days.map((day) => {
-                    return <Button disabled={day.getDate() < new Date().getDate() && day.getMonth() === new Date().getMonth()} onClick={() => setSelectedDay(day.getDate())} className="rounded mediar360-bt" style={{width: '70px', backgroundColor: `${selectedDay === day.getDate() ? 'rgb(17, 175, 228)' : 'white'}`, color: `${selectedDay === day.getDate() ? 'white' : 'rgb(17, 175, 228)'}`, border: '1px solid rgb(17, 175, 228)'}}>{formatDateToDay(day)}</Button>
+                  { days.map((day, index) => {
+                    return <Button key={day.getTime()} disabled={day.getDate() < new Date().getDate() && day.getMonth() === new Date().getMonth()} onClick={() => setSelectedDay(day.getDate())} className="rounded mediar360-bt" style={{width: '70px', backgroundColor: `${selectedDay === day.getDate() ? 'rgb(17, 175, 228)' : 'white'}`, color: `${selectedDay === day.getDate() ? 'white' : 'rgb(17, 175, 228)'}`, border: '1px solid rgb(17, 175, 228)'}}>{formatDateToDay(day)}</Button>
                   })}
                 </ButtonGroup>
               </Typography>
@@ -341,8 +337,8 @@ export function ScheduleMediador({ setPage, setData, data }) {
                 className="font-normal text-blue-gray-500"
               >
                 <ButtonGroup className="gap-1 p-1" style={{flexFlow: 'wrap', justifyContent: 'space-between'}}>
-                  { horarios.map((hora) => {
-                    return <Button onClick={() => setSelectedHour(hora.value)} className="rounded mediar360-bt" style={{width: '115px', backgroundColor: `${selectedHour === hora.value ? 'rgb(17, 175, 228)' : 'white'}`, color: `${selectedHour === hora.value ? 'white' : 'rgb(17, 175, 228)'}`, border: '1px solid rgb(17, 175, 228)'}}>{hora.label}</Button>
+                  { horarios.map((hora, index) => {
+                    return <Button key={hora.value} onClick={() => setSelectedHour(hora.value)} className="rounded mediar360-bt" style={{width: '115px', backgroundColor: `${selectedHour === hora.value ? 'rgb(17, 175, 228)' : 'white'}`, color: `${selectedHour === hora.value ? 'white' : 'rgb(17, 175, 228)'}`, border: '1px solid rgb(17, 175, 228)'}}>{hora.label}</Button>
                   })}
                 </ButtonGroup>
               </Typography>

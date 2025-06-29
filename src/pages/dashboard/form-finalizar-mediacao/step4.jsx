@@ -1,382 +1,206 @@
 import {
   Card,
   CardBody,
-  CardHeader,
-  CardFooter,
-  Avatar,
   Typography,
-  Tabs,
-  TabsHeader,
-  Tab,
-  Switch,
-  Tooltip,
-  Button, ButtonGroup,
+  Button,
+  Input,
 } from "@material-tailwind/react";
-import {
-  HomeIcon,
-  ChatBubbleLeftEllipsisIcon,
-  Cog6ToothIcon,
-  PencilIcon,
-} from "@heroicons/react/24/solid";
-import { Link } from "react-router-dom";
-import { ProfileInfoCard, MessageCard } from "@/widgets/cards";
-import { platformSettingsData, conversationsData, projectsData } from "@/data";
-import {StarIcon} from "@heroicons/react/24/solid/index.js";
-import React, {useEffect, useState} from "react";
-import {PlusIcon} from "@heroicons/react/24/outline/index.js";
-import ResumoMediador from "@/widgets/mediar/ResumoMediador.jsx";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useMediacaoData } from "@/hooks/useMediacaoData";
 import axios from "axios";
-import {API_URL} from "@/config.js";
-import {Step1Cliente} from "@/pages/dashboard/form-finalizar-mediacao/step1.jsx";
+import { API_URL } from "@/config.js";
 
-const getDaysInMonth = (month) => {
-  const date = new Date(new Date().getFullYear(), month, 1);
-  const days = [];
-  while (date.getMonth() === month) {
-    days.push(new Date(date));
-    date.setDate(date.getDate() + 1);
-  }
-  return days;
-}
-
-const weekday = ["Dom","Seg","Ter","Qua","Qui","Sex","Sab"];
-
-const formatDateToDay = (dt) => {
-  return <>{weekday[dt.getDay()]}<br/>{dt.getDate()}</>
-}
-
-const meses = [
-  {
-    label: 'Janeiro',
-    value: 0
-  },
-  {
-    label: 'Fevereiro',
-    value: 1
-  },
-  {
-    label: 'Março',
-    value: 2
-  },
-  {
-    label: 'Abril',
-    value: 3
-  },
-  {
-    label: 'Maio',
-    value: 4
-  },
-  {
-    label: 'Junho',
-    value: 5
-  },
-  {
-    label: 'Julho',
-    value: 6
-  },
-  {
-    label: 'Agosto',
-    value: 7
-  },
-  {
-    label: 'Setembro',
-    value: 8
-  },
-  {
-    label: 'Outubro',
-    value: 9
-  },
-  {
-    label: 'Novembro',
-    value: 10
-  },
-  {
-    label: 'Dezembro',
-    value: 11
-  }
-]
-
-const horarios = [
-  {
-    label: '09:00',
-    value: '0900',
-  },
-  {
-    label: '09:30',
-    value: '0930',
-  },
-  {
-    label: '10:00',
-    value: '1000',
-  },
-  {
-    label: '10:30',
-    value: '1030',
-  },
-  {
-    label: '11:00',
-    value: '1100',
-  },
-  {
-    label: '11:30',
-    value: '1130',
-  },
-  {
-    label: '12:00',
-    value: '1200',
-  },
-  {
-    label: '12:30',
-    value: '1230',
-  },
-  {
-    label: '13:00',
-    value: '1300',
-  },
-  {
-    label: '13:30',
-    value: '1330',
-  },
-  {
-    label: '14:00',
-    value: '1400',
-  },
-  {
-    label: '14:30',
-    value: '1430',
-  },
-  {
-    label: '15:00',
-    value: '1500',
-  },
-  {
-    label: '15:30',
-    value: '1530',
-  },
-  {
-    label: '16:00',
-    value: '1600',
-  },
-  {
-    label: '16:30',
-    value: '1630',
-  },
-  {
-    label: '17:00',
-    value: '1700',
-  },
-  {
-    label: '17:30',
-    value: '1730',
-  }
-]
-
-export function Step4Cliente({ setPage, setData, requestData }) {
-  const [days, setDays] = useState([])
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
-  const [selectedDay, setSelectedDay] = useState(new Date().getDate())
-  const [selectedHour, setSelectedHour] = useState()
+export function Step4Cliente() {
+  const { data: requestData, updateData, navigateToStep } = useMediacaoData();
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState({ success: [], error: [] });
+  const { register, handleSubmit, data } = useForm();
 
-  const selectDateTime = () => {
-    console.log(selectedMonth)
-    console.log(selectedDay)
-    console.log(selectedHour)
-  }
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    const validFiles = files.filter(file => {
+      const isValid = file.type.startsWith('image/') || file.type === 'application/pdf';
+      return isValid;
+    });
+
+    if (validFiles.length !== files.length) {
+      alert('Somente arquivos PDF e imagens são permitidos.');
+    }
+
+    setSelectedFiles(validFiles);
+  };
+
+  const handleBack = () => {
+    navigateToStep('step3')
+  };
+
+  const handleUpload = async () => {
+    if (selectedFiles.length === 0) {
+      alert('Por favor, selecione pelo menos um arquivo.');
+      return;
+    }
+
+    setIsLoading(true);
+    const token = JSON.parse(localStorage.getItem('mediar')).token;
+    const formData = new FormData();
+
+    // Add each file to the FormData
+    selectedFiles.forEach((file, index) => {
+      formData.append(`files`, file);
+    });
+
+    // Add conciliation ID if available
+    if (requestData?.id) {
+      formData.append('conciliationId', requestData.id);
+    }
+
+    try {
+      const response = await axios.post(API_URL + '/documentUpload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'authorization': 'bearer ' + token
+        }
+      });
+
+      setUploadStatus({
+        success: response.data.filePaths || [],
+        error: response.data.error || []
+      });
+
+      if (response.data.filePaths?.length > 0) {
+        // Store the uploaded document URLs and proceed to next step
+        const documentUrls = response.data.filePaths || [];
+        updateData(prevData => ({
+          ...prevData,
+          documents: [...(requestData.documents || []), ...documentUrls]
+        }));
+        // Clear selected files after successful upload
+        setSelectedFiles([]);
+      }
+    } catch (error) {
+      console.error('Error uploading documents:', error);
+      alert('Erro ao fazer upload dos documentos. Por favor, tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setDays(getDaysInMonth(new Date().getMonth()))
-  }, []);
 
-  useEffect(() => {
-    console.log(requestData)
   }, [requestData]);
 
-const removeKeyRecursively = (obj, keyToRemove) => {
-  if (typeof obj !== 'object' || obj === null) {
-    return obj;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(item => removeKeyRecursively(item, keyToRemove));
-  }
-
-  const newObj = {};
-  for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      if (key !== keyToRemove) {
-        newObj[key] = removeKeyRecursively(obj[key], keyToRemove);
-      }
-    }
-  }
-  return newObj;
-};
-
-  const callCreateConciliation = async () => {
-    setIsLoading(true);
-    console.log('step4cliente', {
-      horario: `${selectedHour[0]}${selectedHour[1]}:${selectedHour[2]}0 - 1${selectedHour[2] === '3' ? parseInt(selectedHour[1]) + 1 : selectedHour[1]}:${selectedHour[2] === '0' ? 3 : 0}0`,
-      status: 'agendada',
-      dataMediacao: `2024-${selectedMonth + 1}-${selectedDay}`,
-      ...requestData
-    })
-    selectDateTime()
-    console.log(`${selectedHour[0]}${selectedHour[1]}:${selectedHour[2]}0 - 1${selectedHour[2] === '3' ? parseInt(selectedHour[1]) + 1 : selectedHour[1]}:${selectedHour[2] === '0' ? 3 : 0}0`)
-    console.log(`2024-${selectedMonth + 1}-${selectedDay}`)
-    const cleanedRequestData = removeKeyRecursively(requestData, 'profileImageFile');
-    const token = JSON.parse(localStorage.getItem('mediar')).token
-    axios.put(API_URL + '/conciliations', {
-      ...cleanedRequestData,
-      horario: `${selectedHour[0]}${selectedHour[1]}:${selectedHour[2]}0 - 1${selectedHour[2] === '3' ? parseInt(selectedHour[1]) + 1 : selectedHour[1]}:${selectedHour[2] === '0' ? 3 : 0}0`,
-      status: 'agendada',
-      dataMediacao: `${new Date().getFullYear()}-${selectedMonth + 1}-${selectedDay}`,
-    }, {
-      headers: {
-        authorization: 'bearer ' + token
-      }
-    })
-      .then(function (response) {
-        // handle success
-        setPage('step5Cliente');
-        console.log('Conciliation created/updated successfully:', response);
-      })
-      .catch(function (error) {
-        // handle error
-        console.error('Error during conciliation creation/update:', error);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }
-
   return (
-    <Card className='' style={{flexFlow: 'wrap', boxShadow: 'none'}}>
+    <Card className='w-full' style={{flexFlow: 'wrap', boxShadow: 'none'}}>
       <Card className='w-4/6' style={{boxShadow: 'none'}}>
-        <CardBody className="p-4">
-          <div className="mb-10 flex items-center justify-between flex-wrap gap-6">
-            <div className="flex items-center gap-6 justify-between w-full">
-              <div className="flex">
-                <Avatar
-                  src="/img/andrea-lista.png"
-                  alt="bruce-mars"
-                  size="xl"
-                  variant="rounded"
-                  className="rounded-lg shadow-lg shadow-blue-gray-500/40 w-28 h-28"
-                  style={{borderRadius: '100%'}}
-                />
-                <div className="pt-8 pl-3">
-                  <Typography variant="h5" color="blue-gray" className="mb-1">
-                    {requestData.mediador.name}
-                  </Typography>
-                  <Typography variant="small" color="blue-gray" className="mb-1">
-                    {requestData.mediador.email}
-                  </Typography>
-                </div>
+        <CardBody className="p-0 pt-20 pr-4 w-full">
+
+          <div className="mb-10">
+            <Typography variant="h4" color="blue-gray" className="mb-3">
+              Upload de Documentos
+            </Typography>
+            <Typography variant="paragraph" className="mb-8">
+              Por favor, faça o upload dos documentos necessários para a mediação.
+              Somente arquivos PDF e imagens são aceitos.
+            </Typography>
+
+            {requestData?.documents?.length > 0 && (
+              <div className="mb-6">
+                <Typography variant="h6" className="mb-2">
+                  Documentos já anexados:
+                </Typography>
+                <ul className="list-disc pl-5 mb-6">
+                  {requestData.documents.map((doc, index) => {
+
+                    const displayName = typeof doc === 'string' ? doc.split('/').pop() : (doc.name || 'Documento ' + (index + 1));
+                    const docUrl = typeof doc === 'string' ? doc : doc.url;
+                    return (
+                      <li key={index} className="text-gray-700">
+                        <a 
+                          href={docUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:text-blue-700 underline"
+                        >
+                          {displayName}
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
-              <ResumoMediador />
+            )}
+
+            <div className="mb-6">
+              <Input
+                type="file"
+                multiple
+                accept=".pdf,image/*"
+                onChange={handleFileChange}
+                className="bg-white"
+                containerProps={{ className: "min-w-[100px]" }}
+                labelProps={{
+                  className: "hidden",
+                }}
+              />
             </div>
-            {/*<div className="w-96">*/}
-            {/*  <Tabs value="app">*/}
-            {/*    <TabsHeader>*/}
-            {/*      <Tab value="app">*/}
-            {/*        <HomeIcon className="-mt-1 mr-2 inline-block h-5 w-5" />*/}
-            {/*        App*/}
-            {/*      </Tab>*/}
-            {/*      <Tab value="message">*/}
-            {/*        <ChatBubbleLeftEllipsisIcon className="-mt-0.5 mr-2 inline-block h-5 w-5" />*/}
-            {/*        Message*/}
-            {/*      </Tab>*/}
-            {/*      <Tab value="settings">*/}
-            {/*        <Cog6ToothIcon className="-mt-1 mr-2 inline-block h-5 w-5" />*/}
-            {/*        Settings*/}
-            {/*      </Tab>*/}
-            {/*    </TabsHeader>*/}
-            {/*  </Tabs>*/}
-            {/*</div>*/}
+
+            {selectedFiles.length > 0 && (
+              <div className="mb-6">
+                <Typography variant="h6" className="mb-2">
+                  Arquivos selecionados:
+                </Typography>
+                <ul className="list-disc pl-5">
+                  {selectedFiles.map((file, index) => (
+                    <li key={index} className="text-gray-700">
+                      {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {uploadStatus?.filePaths?.length > 0 && (
+              <div className="mb-4 text-green-500">
+                <Typography variant="h6">Uploads bem-sucedidos:</Typography>
+                <ul className="list-disc pl-5">
+                  {uploadStatus.filePaths.map((file, index) => (
+                    <li key={index}>{file}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {uploadStatus?.error?.length > 0 && (
+              <div className="mb-4 text-red-500">
+                <Typography variant="h6">Falhas no upload:</Typography>
+                <ul className="list-disc pl-5">
+                  {uploadStatus.error.map((file, index) => (
+                    <li key={index}>{file}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="flex justify-between gap-4">
+              <Button
+                variant="text"
+                color="blue-gray"
+                onClick={() => navigateToStep('step3Cliente')}
+              >
+                Voltar
+              </Button>
+              <Button
+                variant="filled"
+                style={{ backgroundColor: '#11afe4' }}
+                onClick={handleUpload}
+                disabled={selectedFiles.length === 0 || isLoading}
+              >
+                {isLoading ? 'Enviando...' : 'Enviar Documentos'}
+              </Button>
+            </div>
           </div>
-          <Card color="transparent" shadow={false}>
-            <CardHeader
-              color="transparent"
-              shadow={false}
-              floated={false}
-              className="mx-0 mt-0 mb-4 flex items-center justify-between gap-4"
-              style={{    justifyContent: 'center'}}
-            >
-              <Typography variant="h6" color="blue-gray">
-                Escolha o mês
-              </Typography>
-              {/*{action}*/}
-            </CardHeader>
-            <CardBody className="p-0">
-              <Typography
-                variant="small"
-                className="font-normal text-blue-gray-500"
-              >
-                <ButtonGroup className="gap-3 p-1" style={{flexFlow: 'wrap', justifyContent: 'space-between', columnGap: 'normal'}}>
-                  { meses.map((mes) => {
-                    return <Button disabled={mes.value < new Date().getMonth()} onClick={() => {
-                      setDays(getDaysInMonth(mes.value))
-                      setSelectedMonth(mes.value)
-                    }} className="rounded mediar360-bt" style={{width: '115px', backgroundColor: `${selectedMonth === mes.value ? 'rgb(17, 175, 228)' : 'white'}`, color: `${selectedMonth === mes.value ? 'white' : 'rgb(17, 175, 228)'}`, border: '1px solid rgb(17, 175, 228)'}}>{mes.label}</Button>
-                  })}
-                </ButtonGroup>
-              </Typography>
-            </CardBody>
-          </Card>
-          <br/>
-          <Card color="transparent" shadow={false}>
-            <CardHeader
-              color="transparent"
-              shadow={false}
-              floated={false}
-              className="mx-0 mt-0 mb-4 flex items-center justify-between gap-4"
-              style={{    justifyContent: 'center'}}
-            >
-              <Typography variant="h6" color="blue-gray">
-                Escolha o dia
-              </Typography>
-              {/*{action}*/}
-            </CardHeader>
-            <CardBody className="p-0">
-              <Typography
-                variant="small"
-                className="font-normal text-blue-gray-500"
-              >
-                <ButtonGroup className="gap-1 p-1" style={{flexWrap: 'wrap', justifyContent: 'space-between', columnGap: 'normal'}}>
-                  { days.map((day) => {
-                    return <Button disabled={day.getDate() < new Date().getDate() && day.getMonth() === new Date().getMonth()} onClick={() => setSelectedDay(day.getDate())} className="rounded mediar360-bt" style={{width: '70px', backgroundColor: `${selectedDay === day.getDate() ? 'rgb(17, 175, 228)' : 'white'}`, color: `${selectedDay === day.getDate() ? 'white' : 'rgb(17, 175, 228)'}`, border: '1px solid rgb(17, 175, 228)'}}>{formatDateToDay(day)}</Button>
-                  })}
-                </ButtonGroup>
-              </Typography>
-            </CardBody>
-          </Card>
-          <br/>
-          <Card color="transparent" shadow={false}>
-            <CardHeader
-              color="transparent"
-              shadow={false}
-              floated={false}
-              className="mx-0 mt-0 mb-4 flex items-center justify-between gap-4"
-              style={{    justifyContent: 'center'}}
-            >
-              <Typography variant="h6" color="blue-gray">
-                Escolha o horário
-              </Typography>
-              {/*{action}*/}
-            </CardHeader>
-            <CardBody className="p-0">
-              <Typography
-                variant="small"
-                className="font-normal text-blue-gray-500"
-              >
-                <ButtonGroup className="gap-1 p-1" style={{flexFlow: 'wrap', justifyContent: 'space-between'}}>
-                  { horarios.map((hora) => {
-                    return <Button onClick={() => setSelectedHour(hora.value)} className="rounded mediar360-bt" style={{width: '115px', backgroundColor: `${selectedHour === hora.value ? 'rgb(17, 175, 228)' : 'white'}`, color: `${selectedHour === hora.value ? 'white' : 'rgb(17, 175, 228)'}`, border: '1px solid rgb(17, 175, 228)'}}>{hora.label}</Button>
-                  })}
-                </ButtonGroup>
-              </Typography>
-            </CardBody>
-          </Card>
         </CardBody>
       </Card>
       <Card className='w-2/6'>
@@ -397,18 +221,19 @@ const removeKeyRecursively = (obj, keyToRemove) => {
               className="flex items-center gap-4 px-4 capitalize"
               fullWidth
               style={{backgroundColor: '#11afe4', placeContent: 'center'}}
-              loading={isLoading}
-              disabled={isLoading}
-              onClick={() => {
-                callCreateConciliation()
-              }}
+              onClick={handleSubmit(async () => {
+                navigateToStep('step5');
+              })}
             >
               {isLoading ? (
-                <Typography color="inherit" className="font-medium capitalize">
-                  Processando...
-                </Typography>
+                <div className="flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-t-2 border-white rounded-full animate-spin" />
+                </div>
               ) : (
-                <Typography color="inherit" className="font-medium capitalize">
+                <Typography
+                  color="inherit"
+                  className="font-medium capitalize"
+                >
                   Próxima etapa
                 </Typography>
               )}
@@ -416,6 +241,29 @@ const removeKeyRecursively = (obj, keyToRemove) => {
           </div>
         </CardBody>
       </Card>
+      <div className="w-full mt-6 flex justify-between gap-4">
+        <Button
+          variant="outlined"
+          className="flex items-center gap-4 px-4 capitalize w-1/4"
+          style={{placeContent: 'center', borderColor: '#11afe4', color: '#11afe4'}}
+          onClick={handleBack}
+        >
+          <Typography color="inherit" className="font-medium capitalize">
+            Voltar
+          </Typography>
+        </Button>
+        <Button
+          variant="text"
+          color="white"
+          className="flex items-center gap-4 px-4 capitalize w-1/4"
+          style={{backgroundColor: '#11afe4', placeContent: 'center'}}
+          onClick={() => navigateToStep('step5')}
+        >
+          <Typography color="inherit" className="font-medium capitalize">
+            Próxima etapa
+          </Typography>
+        </Button>
+      </div>
     </Card>
   );
 }

@@ -32,7 +32,7 @@ export function SuccessSchedule({ setPage, data }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log(data)
+
     navigate("/dashboard/proximas-mediacoes")
     setTimeout(() => setPage(null), 2000)
   }, [setPage])

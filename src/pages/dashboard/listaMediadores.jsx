@@ -47,7 +47,7 @@ export function ListaMediadores({ setPage, setData, data }) {
       })
       .catch(function (error) {
         // handle error
-        console.log(error);
+
       })
       .finally(function () {
         // always executed
@@ -57,8 +57,8 @@ export function ListaMediadores({ setPage, setData, data }) {
   return (
     <Card className='w-full' style={{flexFlow: 'wrap', boxShadow: 'none'}}>
       <Card className='w-4/6 mt-6 gap-9' style={{flexFlow: 'wrap', boxShadow: 'none'}}>
-        { usersList.map((user) => (
-          <Card onClick={() => {selectUser(user)}} className="mb-3" style={{cursor: 'pointer', display: 'inline-block', textAlign: 'center', height: '200px', width: '230px'}}>
+        { usersList.map((user, index) => (
+          <Card key={user._id || index} onClick={() => {selectUser(user)}} className="mb-3" style={{cursor: 'pointer', display: 'inline-block', textAlign: 'center', height: '200px', width: '230px'}}>
             <CardBody>
               <img style={{display: 'inline'}} src="/img/andrea-lista.png" alt=""/>
               <div>

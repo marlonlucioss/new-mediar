@@ -54,17 +54,17 @@ export default function PerfilEndereco({data, setData}) {
       const cleanedCep = postalcode.replace(/\D/g, ''); // Remove non-digit characters
       if (cleanedCep.length === 8) { // Check if CEP has 8 digits
         try {
-          console.log(`Fetching address for CEP: ${cleanedCep}`);
+
           const response = await axios.get(`https://viacep.com.br/ws/${cleanedCep}/json/`);
           const addressData = response.data;
-          console.log('API Response:', addressData);
+
 
           if (!addressData.erro) {
             setNeighborhood(addressData.bairro || '');
             setCity(addressData.localidade || '');
             setEstado(addressData.uf ? addressData.uf.trim().toUpperCase() : ''); // Estado will be autocompleted by CEP
             setAddress(addressData.logradouro || '');
-            console.log('Address fields updated.');
+
           } else {
             console.error("CEP não encontrado ou inválido.");
             // Optionally, clear fields or show an error to the user

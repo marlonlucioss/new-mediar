@@ -8,15 +8,16 @@ import {
 } from "@material-tailwind/react";
 import {Link, Navigate, useNavigate} from "react-router-dom";
 import axios from "axios";
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import {useEffect, useState} from "react";
+import InputMask from "react-input-mask";
 import {API_URL} from "@/config.js";
 
 export function SignIn() {
   const navigate = useNavigate();
   const [hasLogin, setHasLogin] = useState(false)
   const [displayRegister, setDisplayRegister] = useState(false)
-  const [atividade, setAtividade] = useState('')
+
   const {
     register,
     handleSubmit,
@@ -28,12 +29,24 @@ export function SignIn() {
     register: register2,
     handleSubmit: handleSubmit2,
     watch: watch2,
+    control: control2,
+    setValue: setValue2,
     formState: { errors: errors2 },
-  } = useForm()
+  } = useForm({
+    defaultValues: {
+      tipoPessoa: 'fisica'
+    }
+  })
 
   const onSubmitLogin = (data) => callLogin(data)
 
-  const onSubmitRegister = (data) => callRegister({...data, role: atividade})
+  const onSubmitRegister = (data) => {
+    // Clean phone number and cpf/cnpj - remove all non-numeric characters
+    const cleanPhone = data.telefone.replace(/\D/g, '')
+    const documentField = watch2('tipoPessoa') === 'fisica' ? 'cpf' : 'cnpj'
+    const cleanDocument = data[documentField].replace(/\D/g, '')
+    callRegister({...data, telefone: cleanPhone, role: data.atividade, cpfCnpj: cleanDocument})
+  }
 
   const callLogin = (data) => {
     axios.post(API_URL + '/auth/signin', {
@@ -41,15 +54,13 @@ export function SignIn() {
       password: data.password,
     })
       .then(function (response) {
-        console.log(({...response.data, profileImageFile: null}))
         // handle success
-        localStorage.setItem("mediar",JSON.stringify({...response.data, user: {...response.data.user, profileImageFile: null}}))
+        localStorage.setItem("mediar", JSON.stringify(response.data))
         navigate("/dashboard/home");
-        console.log(response);
       })
       .catch(function (error) {
         // handle error
-        console.log(error);
+
       })
       .finally(function () {
         // always executed
@@ -57,8 +68,7 @@ export function SignIn() {
   }
 
   const callRegister = (data) => {
-    // console.log(data)
-    // cpfCnpj-
+
     // email-
     // nome-
     // password-
@@ -75,9 +85,9 @@ export function SignIn() {
     })
     .then(function (response) {
       // handle success
-      console.log("Signup API response.data:", response.data);
+
       const responseDataString = JSON.stringify(response.data);
-      console.log("Stringified response.data length:", responseDataString.length);
+
 
       // It's highly recommended to only store essential data (e.g., token, user ID)
       // instead of the entire response.data if it's large.
@@ -87,8 +97,8 @@ export function SignIn() {
       }
 
       try {
-        localStorage.setItem("mediar", {...responseDataString, profileImageFile: null});
-        console.log("'mediar' successfully set in localStorage.");
+        localStorage.setItem("mediar", JSON.stringify(response.data));
+
         navigate("/dashboard/home");
       } catch (e) {
         if (e.name === 'QuotaExceededError') {
@@ -100,7 +110,7 @@ export function SignIn() {
           console.error("An unexpected error occurred while trying to save to localStorage:", e);
         }
       }
-      // console.log(response); // Original console.log(response) can be kept or removed if it's now redundant with more specific logging
+
     })
     .catch(function (error) {
       // handle error
@@ -113,21 +123,15 @@ export function SignIn() {
     })
     .finally(function () {
       // always executed
-      console.log("Signup API call finished.");
+
     });
   }
 
-  useEffect(() => {
-    const item = localStorage.getItem('mediar')
-    if (item) {
-      navigate("/dashboard/home");
-    }
-  }, [])
-
   return (
-    <section className="flex gap-36">
-      {!hasLogin && <>
-        <div className="w-full lg:w-6/12 mt-24">
+    <section className="flex gap-36 min-h-screen">
+      {!hasLogin && (
+        <>
+        <div className="w-full lg:w-6/12 mt-24 h-screen">
         <div className="text-center">
           <img
             src="/img/login-logo.svg"
@@ -247,8 +251,9 @@ export function SignIn() {
           {/*</Typography>*/}
         </form>
       </div>
-      <div className="w-5/5 lg:block" style={{position: 'relative'}}>
-        { displayRegister && <div className='register-form' style={{
+      <div className="w-5/5 lg:block h-screen" style={{position: 'relative'}}>
+        {displayRegister && (
+          <div className='register-form' style={{
           position: 'absolute',
           backgroundColor: '#86c1d8cc',
           width: '100%',
@@ -284,63 +289,191 @@ export function SignIn() {
               <Input
                 size="lg"
                 placeholder="Nome completo"
-                // label="Nome completo"
                 className=" !border-t-blue-gray-200 focus:!border-t-gray-900 bg-white"
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
-                {...register2("nome", { required: true })}
+                error={!!errors2.nome}
+                {...register2("nome", { required: "Campo obrigatório" })}
               />
-              {errors2.nome && <span className='text-red-600'>This field is required</span>}
+              {errors2.nome && <span className='text-red-600 block' style={{ marginTop: '-23px' }}>{errors2.nome.message}</span>}
               <Input
                 size="lg"
                 placeholder="Email"
-                // label="Email"
                 className=" !border-t-blue-gray-200 focus:!border-t-gray-900 bg-white"
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
-                {...register2("email", { required: true })}
+                error={!!errors2.email}
+                {...register2("email", { 
+                  required: "Campo obrigatório",
+                  pattern: { 
+                    value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+                    message: "Formato de email inválido"
+                  },
+                  validate: {
+                    notEmpty: value => value.trim() !== "" || "Email não pode estar vazio",
+                    validDomain: value => value.includes(".") || "Domínio inválido",
+                    noSpaces: value => !value.includes(" ") || "Email não pode conter espaços"
+                  }
+                })}
               />
-              {errors2.email && <span className='text-red-600'>This field is required</span>}
-              <Input
-                size="lg"
-                placeholder="Telefone"
-                // label="Telefone"
-                className=" !border-t-blue-gray-200 focus:!border-t-gray-900 bg-white"
-                labelProps={{
-                  className: "before:content-none after:content-none",
-                }}
-                {...register2("telefone", { required: true })}
+              {errors2.email && <span className='text-red-600 block' style={{ marginTop: '-23px' }}>{errors2.email.message}</span>}
+              <InputMask
+                mask="(99) 99999-9999"
+                maskChar={null}
+                {...register2("telefone", { 
+                  required: "Campo obrigatório",
+                  pattern: {
+                    value: /^\([0-9]{2}\) [0-9]{5}-[0-9]{4}$/,
+                    message: "Telefone inválido"
+                  }
+                })}
+              >
+                {(inputProps) => (
+                  <Input
+                    {...inputProps}
+                    size="lg"
+                    placeholder="Telefone"
+                    className=" !border-t-blue-gray-200 focus:!border-t-gray-900 bg-white"
+                    labelProps={{
+                      className: "before:content-none after:content-none",
+                    }}
+                    error={!!errors2.telefone}
+                  />
+                )}
+              </InputMask>
+              {errors2.telefone && <span className='text-red-600 block' style={{ marginTop: '-23px' }}>{errors2.telefone.message}</span>}
+              <Controller
+                name="atividade"
+                control={control2}
+                rules={{ required: "Campo obrigatório" }}
+                render={({ field }) => (
+                  <Select 
+                    label="Selecione sua atividade" 
+                    className='bg-white'
+                    value={field.value}
+                    onChange={(val) => {
+                      field.onChange(val);
+                    }}
+                    error={!!errors2.atividade}
+                  >
+                    <Option value='advogado'>Advogado</Option>
+                    <Option value='cliente'>Cliente</Option>
+                    <Option value='mediador'>Mediador</Option>
+                    <Option value='empresa'>Empresa</Option>
+                  </Select>
+                )}
               />
-              {errors2.telefone && <span className='text-red-600'>This field is required</span>}
-              <Select label="Selecione sua atividade" className='bg-white' value={atividade}
-                      onChange={(val) => setAtividade(val)}>
-                <Option value='mediador'>Mediador</Option>
-                <Option value='cliente'>Cliente</Option>
-                <Option value='empresa'>Empresa</Option>
-              </Select>
-              {errors2.atividade && <span className='text-red-600'>This field is required</span>}
-              <Input
-                size="lg"
-                placeholder="CPF ou CNPJ"
-                // label="CPF ou CNPJ"
-                className=" !border-t-blue-gray-200 focus:!border-t-gray-900 bg-white"
-                labelProps={{
-                  className: "before:content-none after:content-none",
-                }}
-                {...register2("cpfCnpj", { required: true })}
+              {errors2.atividade && <span className='text-red-600 block' style={{ marginTop: '-23px' }}>{errors2.atividade.message}</span>}
+              <Controller
+                name="tipoPessoa"
+                control={control2}
+                rules={{ required: "Campo obrigatório" }}
+                defaultValue="fisica"
+                render={({ field }) => (
+                  <Select 
+                    label="Tipo de pessoa" 
+                    className='bg-white'
+                    value={field.value}
+                    onChange={(val) => {
+                      field.onChange(val);
+                      // Reset form fields when switching person type
+                      if (val === 'fisica') {
+                        setValue2('cnpj', '');
+                      } else {
+                        setValue2('cpf', '');
+                      }
+                    }}
+                    error={!!errors2.tipoPessoa}
+                  >
+                    <Option value='fisica'>Física</Option>
+                    <Option value='juridica'>Jurídica</Option>
+                  </Select>
+                )}
               />
-              {errors2.cpfCnpj && <span className='text-red-600'>This field is required</span>}
-              {/*<Input*/}
-              {/*  size="lg"*/}
-              {/*  placeholder="Nome de usuário"*/}
-              {/*  className=" !border-t-blue-gray-200 focus:!border-t-gray-900 bg-white"*/}
-              {/*  labelProps={{*/}
-              {/*    className: "before:content-none after:content-none",*/}
-              {/*  }}*/}
-              {/*  {...register("atividade", { required: true })}*/}
-              {/*/>*/}
+              {errors2.tipoPessoa && <span className='text-red-600 block' style={{ marginTop: '-23px' }}>{errors2.tipoPessoa.message}</span>}
+
+              {watch2('tipoPessoa') === 'fisica' ? (
+                <>
+                  <Controller
+                    name="cpf"
+                    control={control2}
+                    rules={{
+                      required: "Campo obrigatório",
+                      validate: {
+                        validFormat: value => {
+                          if (!value) return true;
+                          const numbers = value.replace(/\D/g, '');
+                          return numbers.length === 11 || "CPF inválido";
+                        }
+                      }
+                    }}
+                    render={({ field }) => (
+                      <InputMask
+                        {...field}
+                        mask="999.999.999-99"
+                        maskChar={null}
+                        alwaysShowMask={false}
+                      >
+                        {(inputProps) => (
+                          <Input
+                            {...inputProps}
+                            size="lg"
+                            placeholder="CPF"
+                            className=" !border-t-blue-gray-200 focus:!border-t-gray-900 bg-white"
+                            labelProps={{
+                              className: "before:content-none after:content-none",
+                            }}
+                            error={!!errors2.cpf}
+                          />
+                        )}
+                      </InputMask>
+                    )}
+                  />
+                  {errors2.cpf && <span className='text-red-600 block' style={{ marginTop: '-23px' }}>{errors2.cpf.message}</span>}
+                </>
+              ) : (
+                <>
+                  <Controller
+                    name="cnpj"
+                    control={control2}
+                    rules={{
+                      required: "Campo obrigatório",
+                      validate: {
+                        validFormat: value => {
+                          if (!value) return true;
+                          const numbers = value.replace(/\D/g, '');
+                          return numbers.length === 14 || "CNPJ inválido";
+                        }
+                      }
+                    }}
+                    render={({ field }) => (
+                      <InputMask
+                        {...field}
+                        mask="99.999.999/9999-99"
+                        maskChar={null}
+                        alwaysShowMask={false}
+                      >
+                        {(inputProps) => (
+                          <Input
+                            {...inputProps}
+                            size="lg"
+                            placeholder="CNPJ"
+                            className=" !border-t-blue-gray-200 focus:!border-t-gray-900 bg-white"
+                            labelProps={{
+                              className: "before:content-none after:content-none",
+                            }}
+                            error={!!errors2.cnpj}
+                          />
+                        )}
+                      </InputMask>
+                    )}
+                  />
+                  {errors2.cnpj && <span className='text-red-600 block' style={{ marginTop: '-23px' }}>{errors2.cnpj.message}</span>}
+                </>
+              )}
+
               <Typography variant="paragraph" color="" style={{width: '348px',
                 top: '69px',
                 left: '8px',
@@ -360,9 +493,13 @@ export function SignIn() {
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
-                {...register2("password", { required: true })}
+                error={!!errors2.password}
+                {...register2("password", { 
+                  required: "Campo obrigatório",
+                  minLength: { value: 6, message: "A senha deve ter no mínimo 6 caracteres" }
+                })}
               />
-              {errors2.password && <span className='text-red-600'>This field is required</span>}
+              {errors2.password && <span className='text-red-600 block' style={{ marginTop: '-23px' }}>{errors2.password.message}</span>}
               <Typography variant="paragraph" color="" style={{width: '348px',
                 top: '69px',
                 left: '8px',
@@ -377,14 +514,18 @@ export function SignIn() {
               <Input
                 type="password"
                 size="lg"
-                placeholder="Senha"
+                placeholder="Confirmar senha"
                 className=" !border-t-blue-gray-200 focus:!border-t-gray-900 bg-white"
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
-                {...register2("password_confirmation", { required: true })}
+                error={!!errors2.password_confirmation}
+                {...register2("password_confirmation", { 
+                  required: "Campo obrigatório",
+                  validate: value => value === watch2('password') || "As senhas não coincidem"
+                })}
               />
-              {errors2.password && <span className='text-red-600'>This field is required</span>}
+              {errors2.password_confirmation && <span className='text-red-600 block' style={{ marginTop: '-23px' }}>{errors2.password_confirmation.message}</span>}
             </div>
             <Checkbox
               label={
@@ -405,14 +546,15 @@ export function SignIn() {
               Cadastrar!
             </Button>
           </form>
-        </div> }
+        </div>)
+        }
         <img
           src="/img/login-image.svg"
-          className="object-cover"
+          className="object-cover w-full h-full"
         />
-      </div>
+        </div>
         </>
-      }
+      )}
     </section>
   );
 }

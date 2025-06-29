@@ -20,6 +20,7 @@ import {
   LockClosedIcon,
 } from "@heroicons/react/24/solid";
 import {useForm} from "react-hook-form";
+import { useMediacaoData } from "@/hooks/useMediacaoData";
 import InputMask from "react-input-mask";
 
 function formatCardNumber(value) {
@@ -48,17 +49,28 @@ function formatExpires(value) {
     .replace(/^([0-1]{1}[0-9]{1})([0-9]{1,2}).*/g, "$1/$2");
 }
 
-export function Step2Cliente({ setPage, setData, requestData }) {
+export function Step2Cliente() {
+  const { data: requestData, updateData, navigateToStep } = useMediacaoData();
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm()
+  } = useForm({
+    defaultValues: {
+      nome_cliente: requestData?.nome_cliente || '',
+      cpf_cliente: requestData?.cpf_cliente || '',
+      telefone_cliente: requestData?.telefone_cliente || '',
+      email_cliente: requestData?.email_cliente || ''
+    }
+  })
   const onSubmit = (data) => {
-    console.log('step2cliente', {...requestData, ...data})
-    setData({...requestData, ...data})
-    setPage('step3Cliente')
+    updateData({...requestData, ...data})
+    navigateToStep('step3')
+  }
+
+  const handleBack = () => {
+    navigateToStep('step1')
   }
   const [type, setType] = React.useState("card");
   const [cardNumber, setCardNumber] = React.useState("");
@@ -255,21 +267,30 @@ export function Step2Cliente({ setPage, setData, requestData }) {
                 </Typography>
               )}
             </div>
-            <Button
-              variant={"text"}
-              color={'white'}
-              className="flex items-center gap-4 px-4 capitalize w-2/6"
-              fullWidth
-              type='submit'
-              style={{backgroundColor: '#11afe4', placeContent: 'center'}}
-            >
-              <Typography
-                color="inherit"
-                className="font-medium capitalize"
+
+            <div className="w-full mt-6 flex justify-between gap-4">
+              <Button
+                variant="outlined"
+                className="flex items-center gap-4 px-4 capitalize w-1/4"
+                style={{placeContent: 'center', borderColor: '#11afe4', color: '#11afe4'}}
+                onClick={handleBack}
               >
-                Próxima etapa
-              </Typography>
-            </Button>
+                <Typography color="inherit" className="font-medium capitalize">
+                  Voltar
+                </Typography>
+              </Button>
+              <Button
+                variant="text"
+                color="white"
+                className="flex items-center gap-4 px-4 capitalize w-1/4"
+                style={{backgroundColor: '#11afe4', placeContent: 'center'}}
+                type="submit"
+              >
+                <Typography color="inherit" className="font-medium capitalize">
+                  Próxima etapa
+                </Typography>
+              </Button>
+            </div>
           </form>
         </CardBody>
       </Card>

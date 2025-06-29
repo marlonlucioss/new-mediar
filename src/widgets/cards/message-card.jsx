@@ -45,9 +45,10 @@ MessageCard.defaultProps = {
 };
 
 MessageCard.propTypes = {
-  img: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  message: PropTypes.node.isRequired,
+  nome_cliente: PropTypes.string.isRequired,
+  horario: PropTypes.string,
+  dataMediacao: PropTypes.string,
+  status: PropTypes.string,
   action: PropTypes.node,
 };
 

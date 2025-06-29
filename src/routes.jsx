@@ -19,6 +19,12 @@ import {Calendario} from "@/pages/dashboard/calendario.jsx";
 import ProximasMediacoes from "@/pages/dashboard/proximas-mediacoes.jsx";
 import Agenda from "@/pages/dashboard/agenda.jsx";
 import Perfil from "@/pages/dashboard/perfil.jsx";
+import {Step1Cliente} from "@/pages/dashboard/form-finalizar-mediacao/step1.jsx";
+import {Step2Cliente} from "@/pages/dashboard/form-finalizar-mediacao/step2.jsx";
+import Step3Cliente from "@/pages/dashboard/form-finalizar-mediacao/step3.jsx";
+import Step4Cliente from "@/pages/dashboard/form-finalizar-mediacao/step4.jsx";
+import {Step5Cliente} from "@/pages/dashboard/form-finalizar-mediacao/step5.jsx";
+import SuccessSchedulingCliente from "@/pages/dashboard/successSchedulingCliente.jsx";
 
 const icon = {
   className: "w-5 h-5 text-inherit",
@@ -45,6 +51,36 @@ export const routes = [
         name: "Minhas mediações",
         path: "/proximas-mediacoes",
         element: <ProximasMediacoes />,
+      },
+      {
+        path: "/cliente/step1",
+        element: <Step1Cliente />,
+        hidden: true,
+      },
+      {
+        path: "/cliente/step2",
+        element: <Step2Cliente />,
+        hidden: true,
+      },
+      {
+        path: "/cliente/step3",
+        element: <Step3Cliente />,
+        hidden: true,
+      },
+      {
+        path: "/cliente/step4",
+        element: <Step4Cliente />,
+        hidden: true,
+      },
+      {
+        path: "/cliente/step5",
+        element: <Step5Cliente />,
+        hidden: true,
+      },
+      {
+        path: "/cliente/success",
+        element: <SuccessSchedulingCliente />,
+        hidden: true,
       },
       // {
       //   icon: <UserIcon {...icon} />,
@@ -89,43 +125,19 @@ export const routes = [
     layout: "auth",
     pages: [
       {
-        icon: <CameraIcon {...icon} />,
-        name: "Sala de reunião",
+        icon: <ServerStackIcon {...icon} />,
+        name: "Entrar",
         path: "/sign-in",
         element: <SignIn />,
       },
       {
         icon: <RectangleStackIcon {...icon} />,
-        name: "Arquivos",
-        path: "/sign-up",
-        element: <SignUp />,
-      },
-      {
-        icon: <CogIcon {...icon} />,
-        name: "Configurações",
+        name: "Cadastrar",
         path: "/sign-up",
         element: <SignUp />,
       },
     ],
   },
-  // {
-  //   title: "",
-  //   layout: "auth",
-  //   pages: [
-  //     {
-  //       icon: <ServerStackIcon {...icon} />,
-  //       name: "Entrar",
-  //       path: "/sign-in",
-  //       element: <SignIn />,
-  //     },
-  //     {
-  //       icon: <RectangleStackIcon {...icon} />,
-  //       name: "Cadastrar",
-  //       path: "/sign-up",
-  //       element: <SignUp />,
-  //     },
-  //   ],
-  // },
 ];
 
 export default routes;

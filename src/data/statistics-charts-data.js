@@ -108,16 +108,19 @@ export const statisticsChartsData = [
   {
     color: "white",
     title: "Website View",
+    description: "Visualizações do site",
     chart: websiteViewsChart,
   },
   {
     color: "white",
     title: "Temperatura do mediador",
+    description: "Avaliação do mediador",
     chart: dailySalesChart,
   },
   {
     color: "white",
     title: "Completed Tasks",
+    description: "Tarefas concluídas",
     chart: completedTasksChart,
   },
 ];

@@ -28,7 +28,7 @@ import ResumoMediador from "@/widgets/mediar/ResumoMediador.jsx";
 import ComunicacoesMediador from "@/widgets/mediar/ComunicacoesMediador.jsx";
 
 export function OverviewMediador({ setPage, data }) {
-  console.log(data)
+
   return (
     <Card className='' style={{flexFlow: 'wrap', boxShadow: 'none'}}>
       <Card className='w-4/6' style={{boxShadow: 'none'}}>

@@ -11,6 +11,7 @@ import {
   Switch,
   Tooltip,
   Button,
+  Spinner,
 } from "@material-tailwind/react";
 import {
   HomeIcon,
@@ -19,6 +20,8 @@ import {
   PencilIcon,
 } from "@heroicons/react/24/solid";
 import { Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { useMediacaoData } from "@/hooks/useMediacaoData";
 import { ProfileInfoCard, MessageCard } from "@/widgets/cards";
 import {platformSettingsData, conversationsData, projectsData, ordersOverviewData} from "@/data";
 import {StarIcon} from "@heroicons/react/24/solid/index.js";
@@ -27,21 +30,26 @@ import axios from "axios";
 import {API_URL} from "@/config.js";
 import {Step1Cliente} from "@/pages/dashboard/form-finalizar-mediacao/step1.jsx";
 
-export function Step3Cliente({ setPage, setData, requestData }) {
+export function Step3Cliente() {
+  const { data: requestData, updateData, navigateToStep } = useMediacaoData();
   const [usersList, setUsersList] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
 
 
   const selectUser = (user) => {
-    console.log({...requestData, mediador: user})
-    setData({...requestData, mediador: user})
-    setPage('step4Cliente')
+    updateData({...requestData, mediador: user})
+  }
+
+  const handleBack = () => {
+    navigateToStep('step2')
   }
 
   useEffect(() => {
-    console.log(requestData)
+
   }, [requestData]);
 
   useEffect(() => {
+    setIsLoading(true);
     axios.get(API_URL + '/users?perfil=mediador', {
       headers: {
         authorization: 'bearer ' + JSON.parse(localStorage.getItem('mediar')).token
@@ -53,18 +61,34 @@ export function Step3Cliente({ setPage, setData, requestData }) {
       })
       .catch(function (error) {
         // handle error
-        console.log(error);
+
       })
       .finally(function () {
-        // always executed
+        setIsLoading(false);
       });
   }, [])
 
   return (
     <Card className='w-full' style={{flexFlow: 'wrap', boxShadow: 'none'}}>
       <Card className='w-4/6 mt-6 gap-9' style={{flexFlow: 'wrap', boxShadow: 'none'}}>
-        { usersList.map((user) => (
-          <Card onClick={() => {selectUser(user)}} className="mb-3" style={{cursor: 'pointer', display: 'inline-block', textAlign: 'center', height: '200px', width: '230px'}}>
+        {isLoading ? (
+          <div className="flex items-center justify-center w-full h-64">
+            <Spinner className="h-12 w-12" />
+          </div>
+        ) : (
+          usersList.map((user, index) => (
+          <Card key={user._id || index}
+            onClick={() => {selectUser(user)}} 
+            className={`mb-3 ${requestData?.mediador?._id === user._id ? 'ring-2 ring-blue-500' : ''}`} 
+            style={{
+              cursor: 'pointer', 
+              display: 'inline-block', 
+              textAlign: 'center', 
+              height: '200px', 
+              width: '230px',
+              backgroundColor: requestData?.mediador?._id === user._id ? '#f0f9ff' : 'white'
+            }}
+          >
             <CardBody>
               <img style={{display: 'inline'}} src="/img/andrea-lista.png" alt=""/>
               <div>
@@ -94,10 +118,11 @@ export function Step3Cliente({ setPage, setData, requestData }) {
               </div>
             </CardBody>
           </Card>
-        ))}
+        ))
+        )}
       </Card>
       <Card className='w-2/6'>
-        <CardBody className="p-4">
+        <CardBody className="p-0 pt-20 pr-4 w-full">
           <div className="m-4">
             <Typography variant="h3" color="blue-gray" className="mb-7">
               Assistente Virtual
@@ -106,7 +131,10 @@ export function Step3Cliente({ setPage, setData, requestData }) {
               variant="small"
               className="font-normal text-blue-gray-600 mb-7"
             >
-              Agora que você já escolheu o seu mediador, basta prosseguir para o agendamento da mediação.
+              {requestData?.mediador ? 
+                `Você selecionou ${requestData.mediador.name} como seu mediador. Clique em próxima etapa para continuar.` :
+                'Selecione um mediador para prosseguir com o agendamento da mediação.'
+              }
             </Typography>
             <Button
               variant={"text"}
@@ -114,7 +142,8 @@ export function Step3Cliente({ setPage, setData, requestData }) {
               className="flex items-center gap-4 px-4 capitalize"
               fullWidth
               style={{backgroundColor: '#11afe4', placeContent: 'center'}}
-              onClick={() => setPage('schedule-mediador')}
+              onClick={() => navigateToStep('step4')}
+              disabled={!requestData?.mediador}
             >
               <Typography
                 color="inherit"
@@ -126,6 +155,30 @@ export function Step3Cliente({ setPage, setData, requestData }) {
           </div>
         </CardBody>
       </Card>
+      <div className="w-full mt-6 flex justify-between gap-4">
+        <Button
+          variant="outlined"
+          className="flex items-center gap-4 px-4 capitalize w-1/4"
+          style={{placeContent: 'center', borderColor: '#11afe4', color: '#11afe4'}}
+          onClick={handleBack}
+        >
+          <Typography color="inherit" className="font-medium capitalize">
+            Voltar
+          </Typography>
+        </Button>
+        <Button
+          variant="text"
+          color="white"
+          className="flex items-center gap-4 px-4 capitalize w-1/4"
+          style={{backgroundColor: '#11afe4', placeContent: 'center'}}
+          onClick={() => navigateToStep('step4')}
+          disabled={!requestData?.mediador}
+        >
+          <Typography color="inherit" className="font-medium capitalize">
+            Próxima etapa
+          </Typography>
+        </Button>
+      </div>
     </Card>
   );
 }

@@ -35,6 +35,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import {InformationCircleIcon} from "@heroicons/react/24/outline/index.js";
 import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 import {API_URL} from "@/config.js";
 const events = [
   { title: 'Meeting', start: new Date() }
@@ -65,6 +66,7 @@ const handleEventClick = (selected) => {
   }
 };
 export function Home() {
+  const navigate = useNavigate();
   const [currentEvents, setCurrentEvents] = useState([]);
   const [nextConciliationList, setNextConciliationList] = useState([]);
   const [conciliationStatistics, setConciliationStatistics] = useState({
@@ -88,7 +90,12 @@ export function Home() {
   const alerts = ["gray", "green", "orange", "red", "green"];
 
   useEffect(() => {
-    const token = JSON.parse(localStorage.getItem('mediar')).token
+    const mediarData = localStorage.getItem('mediar');
+    if (!mediarData) {
+      navigate('/auth/sign-in');
+      return;
+    }
+    const token = JSON.parse(mediarData).token
     axios.get(API_URL + `/conciliations/next${JSON.parse(localStorage.getItem('mediar')).user.role === 'empresa' ? '?empresa='+JSON.parse(localStorage.getItem('mediar')).user.cpfCnpj : ''}${JSON.parse(localStorage.getItem('mediar')).user.role === 'cliente' ? '?cliente='+JSON.parse(localStorage.getItem('mediar')).user.email : ''}${JSON.parse(localStorage.getItem('mediar')).user.role === 'mediador' ? '?mediador='+JSON.parse(localStorage.getItem('mediar')).user.email : ''}`, {
       headers: {
         authorization: 'bearer ' + token
@@ -96,12 +103,11 @@ export function Home() {
     })
       .then(function (response) {
         // handle success
-        console.log(response);
         setNextConciliationList(response.data)
       })
       .catch(function (error) {
         // handle error
-        console.log(error);
+
       })
       .finally(function () {
         // always executed
@@ -113,12 +119,11 @@ export function Home() {
     })
       .then(function (response) {
         // handle success
-        console.log(response);
         setConciliationStatistics(response.data)
       })
       .catch(function (error) {
         // handle error
-        console.log(error);
+
       })
       .finally(function () {
         // always executed
@@ -173,7 +178,7 @@ export function Home() {
                   color="blue-gray"
                   className="mb-1 font-semibold"
                 >
-                  {JSON.parse(localStorage.getItem('mediar')).user.name}
+                  {localStorage.getItem('mediar') && JSON.parse(localStorage.getItem('mediar'))?.user?.name || 'Usuário'}
                 </Typography>
                 <Typography className="text-xs font-normal text-blue-gray-400">
                   Mediador de família
@@ -197,7 +202,7 @@ export function Home() {
           </CardHeader>
           <CardBody className="pt-0">
             {profileOverviewData.map(
-              ({ icon, color, title, description }, key) => (
+              ({ icon, color, title, description }, index) => (
                 <div key={title} className="flex items-start gap-4 py-3 mr-7" style={{display: 'inline-grid', width: '40%'}}>
                   {/*<div*/}
                   {/*  className={`relative p-1 after:absolute after:-bottom-6 after:left-2/4 after:w-0.5 after:-translate-x-2/4 after:bg-blue-gray-50 after:content-[''] ${*/}
@@ -254,9 +259,9 @@ export function Home() {
           </CardHeader>
           <CardBody className="pt-0">
             <ul className="flex flex-col gap-6">
-              {nextConciliationList.map((props) => (
+              {nextConciliationList.map((props, index) => (
                 <MessageCard
-                  key={props.name}
+                  key={props._id || index}
                   {...props}
                 />
               ))}
@@ -342,8 +347,9 @@ export function Home() {
           return (
             <StatisticsChart
               key={props.title}
-              title={'Temperatura'}
               {...props}
+              title={'Temperatura'}
+              description={props.description || 'Avaliação do mediador'}
               // footer={
               //   <Typography
               //     variant="small"

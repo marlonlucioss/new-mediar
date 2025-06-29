@@ -20,6 +20,7 @@ import {
   LockClosedIcon,
 } from "@heroicons/react/24/solid";
 import {useForm} from "react-hook-form";
+import { useMediacaoData } from "@/hooks/useMediacaoData";
 
 function formatCardNumber(value) {
   const val = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
@@ -47,17 +48,26 @@ function formatExpires(value) {
     .replace(/^([0-1]{1}[0-9]{1})([0-9]{1,2}).*/g, "$1/$2");
 }
 
-export function Step1Cliente({ setPage, setData, requestData }) {
+export function Step1Cliente() {
+  const { data: requestData, updateData, navigateToStep } = useMediacaoData();
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm()
+  } = useForm({
+    defaultValues: requestData || {},
+    values: requestData || {}
+  })
   const onSubmit = (data) => {
-    console.log('step1cliente', {...requestData, ...data})
-    setData({...requestData, ...data})
-    setPage('step2Cliente')
+    // First update the data in our state and storage
+    updateData(currentData => ({
+      ...currentData,
+      ...data
+    }));
+
+    // Then navigate to next step
+    navigateToStep('step2');
   }
   const [type, setType] = React.useState("card");
   const [cardNumber, setCardNumber] = React.useState("");

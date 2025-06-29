@@ -19,6 +19,8 @@ import {
   PencilIcon,
 } from "@heroicons/react/24/solid";
 import {Link, useNavigate} from "react-router-dom";
+import {useForm} from "react-hook-form";
+import { useMediacaoData } from "@/hooks/useMediacaoData";
 import { ProfileInfoCard, MessageCard } from "@/widgets/cards";
 import {platformSettingsData, conversationsData, projectsData, ordersOverviewData} from "@/data";
 import {StarIcon} from "@heroicons/react/24/solid/index.js";
@@ -27,14 +29,31 @@ import SuccessIcon from "@/images-svg/success-mediation.jsx";
 import ResumoMediador from "@/widgets/mediar/ResumoMediador.jsx";
 import axios from "axios";
 
-export function SuccessSchedulingCliente({ setPage, data }) {
+export function SuccessSchedulingCliente() {
+  const { data: requestData } = useMediacaoData();
 
   const navigate = useNavigate();
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "Data não especificada";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: 'long',
+      weekday: 'long'
+    });
+  }
+
   useEffect(() => {
-    navigate("/dashboard/proximas-mediacoes")
-    setTimeout(() => setPage(null), 2000)
-  }, [setPage])
+    // Auto-navigate to proximas-mediacoes after 2 seconds
+    const timer = setTimeout(() => {
+      navigate("/dashboard/proximas-mediacoes");
+    }, 2000);
+
+    // Cleanup timer
+    return () => clearTimeout(timer);
+  }, [navigate])
+
 
   return (
     <Card style={{flexFlow: 'wrap', boxShadow: 'none', }}>
@@ -53,7 +72,7 @@ export function SuccessSchedulingCliente({ setPage, data }) {
             />
             <div className="items-center gap-6">
               <Typography variant="h6" color="#828282">
-                12:30 - 14 de fevereiro - Terça-feira
+                {formatDate(requestData?.dataMediacao)} - {requestData?.horario}
               </Typography>
             </div>
           </div>
@@ -80,13 +99,13 @@ export function SuccessSchedulingCliente({ setPage, data }) {
                 />
                 <div className="pt-8 pl-3">
                   <Typography variant="h5" color="blue-gray" className="mb-1">
-                    Andrea Maia
+                    {requestData?.mediador?.name || "Nome do Mediador"}
                   </Typography>
                   <Typography
                     variant="small"
                     className="font-normal text-blue-gray-600"
                   >
-                    Mediação familiar
+                    {requestData?.mediador?.email || "Mediação familiar"}
                   </Typography>
                 </div>
               </div>
@@ -105,8 +124,24 @@ export function SuccessSchedulingCliente({ setPage, data }) {
               variant="small"
               className="font-normal text-blue-gray-600 mb-7"
             >
-              Agora que você já escolheu o seu mediador, basta prosseguir para o agendamento da mediação.
+              Sua mediação foi agendada com sucesso.
             </Typography>
+            <Button
+              variant={"text"}
+              color={'white'}
+              className="flex items-center gap-4 px-4"
+              fullWidth
+              style={{backgroundColor: '#11afe4', placeContent: 'center'}}
+              onClick={() => setPage(null)}
+            >
+              <Typography
+                color="inherit"
+                className="font-medium none"
+                style={{textTransform: 'none'}}
+              >
+                Finalizar e ver mediações
+              </Typography>
+            </Button>
           </div>
         </CardBody>
       </Card>

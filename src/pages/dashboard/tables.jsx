@@ -25,7 +25,7 @@ export function Tables() {
           <table className="w-full min-w-[640px] table-auto">
             <thead>
               <tr>
-                {["horário", "cliente", "tipo de mediação", "mediador", "plataforma", "status", ""].map((el) => (
+                {["horário", "cliente", "tipo de mediação", "mediador", "plataforma", "status", ""].map((el, index) => (
                   <th
                     key={el}
                     className="border-b border-blue-gray-50 py-3 px-5 text-left"
@@ -210,7 +210,7 @@ export function Tables() {
             <thead>
               <tr>
                 {["companies", "members", "budget", "completion", ""].map(
-                  (el) => (
+                  (el, index) => (
                     <th
                       key={el}
                       className="border-b border-blue-gray-50 py-3 px-5 text-left"
@@ -250,7 +250,7 @@ export function Tables() {
                         </div>
                       </td>
                       <td className={className}>
-                        {members.map(({ img, name }, key) => (
+                        {members.map(({ img, name }, index) => (
                           <Tooltip key={name} content={name}>
                             <Avatar
                               src={img}
