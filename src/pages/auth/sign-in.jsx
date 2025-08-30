@@ -149,7 +149,7 @@ export function SignIn() {
             letterSpacing: '0px',
             textAlign: 'center',
             margin: 'auto'
-          }} className="text-lg font-normal">Acesse a plataforma Mediar360 inserindo suas credenciais abaixo.</Typography>
+          }} className="text-lg font-normal">Acesse a plataforma Mediar360 inserindo suas credenciais abaixo...</Typography>
         </div>
         <form name='login' onSubmit={handleSubmit(onSubmitLogin)} className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
           <div className="mb-1 flex flex-col gap-6">
@@ -283,7 +283,7 @@ export function SignIn() {
             letterSpacing: '0px',
             textAlign: 'center',
             margin: 'auto'
-          }} className="text-lg font-normal">Acesse a plataforma Mediar360 inserindo suas informações abaixo.</Typography>
+          }} className="text-lg font-normal">Acesse a plataforma Mediar360 inserindo suas informações abaixo..</Typography>
           <form name='register' onSubmit={handleSubmit2(onSubmitRegister)} className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
             <div className="mb-1 flex flex-col gap-6">
               <Input

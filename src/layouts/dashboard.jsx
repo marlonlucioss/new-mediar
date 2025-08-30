@@ -43,7 +43,7 @@ export function Dashboard() {
     }
   }, []);
 
-  const  callCreateConciliation = () => {
+  const callCreateConciliation = async () => {
     const token = JSON.parse(localStorage.getItem('mediar')).token
     setLoading(true)
     const {
@@ -57,10 +57,13 @@ export function Dashboard() {
       ...restOfData 
     } = data;
 
+    console.log('restOfData', restOfData)
+    console.log('data', data)
+
     const payloadToSend = {
       ...restOfData, // Send other relevant parts of `data` collected from previous steps
-      valor_causa: valor_causa !== undefined && valor_causa !== null && !isNaN(parseInt(valor_causa, 10)) ? parseInt(valor_causa, 10) / 100 : null,
-      valor_proposta: valor_proposta !== undefined && valor_proposta !== null && !isNaN(parseInt(valor_proposta, 10)) ? parseInt(valor_proposta, 10) / 100 : null,
+      valor_causa: valor_causa ? String(valor_causa).replace(/R\$\s*/g, '').replace(/\./g, '').replace(',', '.') : '0.00',
+      valor_proposta: valor_proposta ? String(valor_proposta).replace(/R\$\s*/g, '').replace(/\./g, '').replace(',', '.') : '0.00',
       // Format validade_proposta to YYYY-MM-DD string; ensure it's a Date object first
       validade_proposta: validade_proposta ? new Date(validade_proposta).toISOString().split('T')[0] : null,
       telefone_cliente: telefone_cliente ? String(telefone_cliente).replace(/[^0-9]/g, '') : null,
@@ -78,27 +81,23 @@ export function Dashboard() {
       dataMediacao: ``, // Placeholder for the actual date of mediation (distinct from proposal validity)
     };
 
-    axios.post(API_URL + '/conciliations', payloadToSend, {
-      headers: {
-        authorization: 'bearer ' + token
-      }
-    })
-      .then(function (response) {
-        // handle success
-        setPage('step4')
-
-        setLoading(false)
-      })
-      .catch(function (error) {
-        // handle error
-
-        setErrorMessage("Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.");
-        setIsErrorModalOpen(true);
-        setLoading(false)
-      })
-      .finally(function () {
-        // always executed
+    try {
+      const response = await axios.post(API_URL + '/conciliations', payloadToSend, {
+        headers: {
+          authorization: 'bearer ' + token
+        }
       });
+      // handle success
+      setPage('step4');
+      setLoading(false);
+      return response;
+    } catch (error) {
+      // handle error
+      setErrorMessage("Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.");
+      setIsErrorModalOpen(true);
+      setLoading(false);
+      throw error;
+    }
   }
 
   const handleErrorModalClose = () => setIsErrorModalOpen(false);

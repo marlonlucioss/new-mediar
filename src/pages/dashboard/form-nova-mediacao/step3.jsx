@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Card,
   CardHeader,
@@ -6,71 +6,39 @@ import {
   Input,
   Button,
   Typography,
-  Tabs,
-  TabsHeader,
-  TabsBody,
-  Tab,
-  TabPanel,
-  Select,
-  Option,
   Popover,
   PopoverHandler,
   PopoverContent,
 } from "@material-tailwind/react";
-import {
-  BanknotesIcon,
-  CreditCardIcon,
-  LockClosedIcon,
-} from "@heroicons/react/24/solid";
-import { ChevronRightIcon, ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {useForm, Controller} from "react-hook-form";
 
-function formatCardNumber(value) {
-  const val = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
-  const matches = val.match(/\d{4,16}/g);
-  const match = (matches && matches[0]) || "";
-  const parts = [];
 
-  for (let i = 0, len = match.length; i < len; i += 4) {
-    parts.push(match.substring(i, i + 4));
-  }
 
-  if (parts.length) {
-    return parts.join(" ");
-  } else {
-    return value;
-  }
-}
+const formatToBRL = (value) => {
+  if (value === null || value === undefined || value === '') return '';
 
-function formatExpires(value) {
-  return value
-    .replace(/[^0-9]/g, "")
-    .replace(/^([2-9])$/g, "0$1")
-    .replace(/^(1{1})([3-9]{1})$/g, "0$1/$2")
-    .replace(/^0{1,}/g, "0")
-    .replace(/^([0-1]{1}[0-9]{1})([0-9]{1,2}).*/g, "$1/$2");
-}
-
-const formatToBRL = (valueInCents) => {
-  if (valueInCents === null || valueInCents === undefined || valueInCents === '') return '';
-  const numericValue = Number(String(valueInCents).replace(/\D/g, ''));
-  if (isNaN(numericValue)) return '';
-
-  const valueInReais = numericValue / 100;
+  // Remove all non-digit characters
+  let number = String(value).replace(/\D/g, '');
+  
+  // Convert to number and divide by 100 to get the decimal places
+  const amount = Number(number) / 100;
+  
+  // Format as Brazilian currency
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
-    currency: 'BRL',
-  }).format(valueInReais);
+    currency: 'BRL'
+  }).format(amount);
 };
 
 const parseToCents = (formattedValue) => {
-  if (!formattedValue) return '';
+  if (!formattedValue) return '0';
+  // Remove all non-digit characters
   const digits = String(formattedValue).replace(/\D/g, '');
-  return digits;
+  return digits || '0';
 };
 
 export function Step3({ setPage, setData, requestData, callCreateConciliation, loading }) {
@@ -80,14 +48,49 @@ export function Step3({ setPage, setData, requestData, callCreateConciliation, l
     watch,
     formState: { errors },
     control,
+    reset
   } = useForm()
+
+  const [submittedData, setSubmittedData] = React.useState(null);
+
+  useEffect(() => {
+    if (submittedData) {
+      handleSubmission();
+    }
+  }, [submittedData])
+
+  const handleSubmission = async () => {
+      try {
+        const response = await callCreateConciliation();
+        if (response.status === 200) {
+          reset({
+            valor_causa: '',
+            valor_proposta: '',
+            validade_proposta: null,
+            proposta: '',
+            observacoes: ''
+          });
+        }
+        setSubmittedData(null); // Reset the submitted data
+      } catch (error) {
+        console.error('Error creating conciliation:', error);
+        setSubmittedData(null); // Reset submitted data even on error to prevent loops
+      }
+  };
+
   const onSubmit = (data) => {
-    setData({...requestData, ...data})
-    setTimeout(() => callCreateConciliation(), 1000)
-  }
-  const [type, setType] = React.useState("card");
-  const [cardNumber, setCardNumber] = React.useState("");
-  const [cardExpires, setCardExpires] = React.useState("");
+    // Format the monetary values as strings with 2 decimal places
+    const formattedData = {
+      ...data,
+      valor_causa: data.valor_causa ? formatToBRL(data.valor_causa) : '0.00',
+      valor_proposta: data.valor_proposta ? formatToBRL(data.valor_proposta) : '0.00',
+      validade_proposta: data.validade_proposta ? format(data.validade_proposta, 'yyyy-MM-dd') : null
+    };
+    
+    setData({...requestData, ...formattedData});
+    setSubmittedData(formattedData); // Trigger the useEffect
+  };
+
   const [isValidadeDatePickerOpen, setIsValidadeDatePickerOpen] = React.useState(false);
   const currentYear = new Date().getFullYear();
 
@@ -126,6 +129,13 @@ export function Step3({ setPage, setData, requestData, callCreateConciliation, l
                     onChange={(e) => {
                       const rawValue = parseToCents(e.target.value);
                       onChange(rawValue);
+                    }}
+                    onKeyDown={(e) => {
+                      // Allow only numbers, backspace, delete, and arrow keys
+                      if (!/[0-9]/.test(e.key) && 
+                          !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+                        e.preventDefault();
+                      }
                     }}
                     onBlur={onBlur}
                     ref={ref}
@@ -181,6 +191,13 @@ export function Step3({ setPage, setData, requestData, callCreateConciliation, l
                     onChange={(e) => {
                       const rawValue = parseToCents(e.target.value);
                       onChange(rawValue);
+                    }}
+                    onKeyDown={(e) => {
+                      // Allow only numbers, backspace, delete, and arrow keys
+                      if (!/[0-9]/.test(e.key) && 
+                          !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+                        e.preventDefault();
+                      }
                     }}
                     onBlur={onBlur}
                     ref={ref}
