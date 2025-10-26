@@ -94,7 +94,7 @@ export default function PerfilEndereco({data, setData}) {
           </div>
         </div>
       )}
-      <div className="w-full flex" style={{borderRadius: '11px', padding: '30px', backgroundColor: '#E2E5F3'}}>
+      <div className="w-full flex" style={{borderRadius: '11px', padding: '30px', backgroundColor: '#F9F9F9'}}>
         <form action="#" className='flex flex-auto'>
           <div className="container px-6 mx-auto flex flex-col items-start md:items-center justify-between">
             <div className="flex w-full justify-between mb-[10px]">

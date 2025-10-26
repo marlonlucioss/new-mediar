@@ -52,7 +52,7 @@ export default function PerfilGeneralInfo({data, setData}) {
           </div>
         </div>
       )}
-      <div className="w-full flex" style={{borderRadius: '11px', padding: '30px', backgroundColor: '#E2E5F3'}}>
+      <div className="w-full flex" style={{borderRadius: '11px', padding: '30px', backgroundColor: '#F9F9F9'}}>
         <form action="#" className='flex flex-auto'>
           <div className="container px-6 mx-auto flex flex-col items-start md:items-center justify-between">
             <div className="flex w-full justify-between mb-[15px]">
@@ -60,10 +60,8 @@ export default function PerfilGeneralInfo({data, setData}) {
                 <Typography className='inline' variant='h6'>CPF/CNPJ</Typography>
               </div>
               <div className="flex">
-                {!isOnEdit && (
-                  <span>{formatCpfCnpjForDisplay(cpfCnpj)}</span>
-                )}
-                {isOnEdit && (
+                <span>{formatCpfCnpjForDisplay(cpfCnpj)}</span>
+                {/* {isOnEdit && (
                   <InputMask
                     mask={cpfCnpj.replace(/\D/g, '').length > 11 ? '99.999.999/9999-99' : '999.999.999-9999'}
                     value={cpfCnpj}
@@ -72,7 +70,7 @@ export default function PerfilGeneralInfo({data, setData}) {
                   >
                     {(inputProps) => <Input {...inputProps} label="CPF/CNPJ" type="text" className="bg-white" />}
                   </InputMask>
-                )}
+                )} */}
               </div>
             </div>
             <div className="flex w-full justify-between mb-[15px]">

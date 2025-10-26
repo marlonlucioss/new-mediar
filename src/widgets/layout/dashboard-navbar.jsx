@@ -108,7 +108,7 @@ export function DashboardNavbar() {
           {/*  </Typography>*/}
           {/*</Breadcrumbs>*/}
           <Typography variant="h3" color="blue-gray">
-            Olá {localStorage.getItem('mediar') && JSON.parse(localStorage.getItem('mediar'))?.user?.name || 'Usuário'}
+            Olá {localStorage.getItem('mediar') && JSON.parse(localStorage.getItem('mediar'))?.user?.fullname || 'Usuário'}
             {/*{page}*/}
           </Typography>
           <Typography variant="small" color="gray" className='normal-case'>

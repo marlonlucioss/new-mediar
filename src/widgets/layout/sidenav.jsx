@@ -84,7 +84,7 @@ export function Sidenav({ brandImg, brandName, routes, setPage }) {
                   </Typography>
                 </li>
               )}
-              {pages.map(({ icon, name, path }) => (
+              {pages.filter(page => !page.hidden).map(({ icon, name, path }) => (
                 <li key={name}>
                   <NavLink to={`/${layout}${path}`}>
                     {({ isActive }) => (
@@ -93,6 +93,7 @@ export function Sidenav({ brandImg, brandName, routes, setPage }) {
                         className="flex items-center gap-4 px-4 capitalize"
                         fullWidth
                         style={{color: isActive ? '#11afe4' : '#878787', background: 'none', boxShadow: 'none'}}
+                        onClick={() => setPage(null)}
                       >
                         {icon}
                         <Typography

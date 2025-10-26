@@ -317,7 +317,7 @@ export function Step3({ setPage, setData, requestData, callCreateConciliation, l
           </form>
         </CardBody>
       </Card>
-      <Card className='w-2/6 shadow-none'>
+      {/* <Card className='w-2/6 shadow-none'>
         <CardBody className="p-4">
           <div className="m-4">
             <Typography variant="h3" color="blue-gray" className="mb-7">
@@ -331,6 +331,6 @@ export function Step3({ setPage, setData, requestData, callCreateConciliation, l
             </Typography>
           </div>
         </CardBody>
-      </Card>
+      </Card> */}
     </Card>
   )};

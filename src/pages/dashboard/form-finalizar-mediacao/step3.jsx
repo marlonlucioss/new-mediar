@@ -121,7 +121,7 @@ export function Step3Cliente() {
         ))
         )}
       </Card>
-      <Card className='w-2/6'>
+      {/* <Card className='w-2/6'>
         <CardBody className="p-0 pt-20 pr-4 w-full">
           <div className="m-4">
             <Typography variant="h3" color="blue-gray" className="mb-7">
@@ -154,7 +154,7 @@ export function Step3Cliente() {
             </Button>
           </div>
         </CardBody>
-      </Card>
+      </Card> */}
       <div className="w-full mt-6 flex justify-between gap-4">
         <Button
           variant="outlined"

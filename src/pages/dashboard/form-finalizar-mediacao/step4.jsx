@@ -203,7 +203,7 @@ export function Step4Cliente() {
           </div>
         </CardBody>
       </Card>
-      <Card className='w-2/6'>
+      {/* <Card className='w-2/6'>
         <CardBody className="p-4">
           <div className="m-4">
             <Typography variant="h3" color="blue-gray" className="mb-7">
@@ -240,7 +240,7 @@ export function Step4Cliente() {
             </Button>
           </div>
         </CardBody>
-      </Card>
+      </Card> */}
       <div className="w-full mt-6 flex justify-between gap-4">
         <Button
           variant="outlined"

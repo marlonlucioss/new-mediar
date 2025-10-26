@@ -130,10 +130,9 @@ export function Home() {
       });
   }, []);
 
-  return (
-    <div className="mt-12">
-      <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
-        <Card className="border border-blue-gray-100 shadow-sm">
+  /*
+  CÓDIGO DO PERFIL DO MEDIADOR DA HOME
+  <Card className="border border-blue-gray-100 shadow-sm">
           <CardHeader
             floated={false}
             shadow={false}
@@ -197,24 +196,12 @@ export function Home() {
                 </Typography>
               </div>
             </div>
-            {/*{action}*/}
           </div>
           </CardHeader>
           <CardBody className="pt-0">
             {profileOverviewData.map(
               ({ icon, color, title, description }, index) => (
                 <div key={title} className="flex items-start gap-4 py-3 mr-7" style={{display: 'inline-grid', width: '40%'}}>
-                  {/*<div*/}
-                  {/*  className={`relative p-1 after:absolute after:-bottom-6 after:left-2/4 after:w-0.5 after:-translate-x-2/4 after:bg-blue-gray-50 after:content-[''] ${*/}
-                  {/*    key === ordersOverviewData.length - 1*/}
-                  {/*      ? "after:h-0"*/}
-                  {/*      : "after:h-4/6"*/}
-                  {/*  }`}*/}
-                  {/*>*/}
-                  {/*  {React.createElement(icon, {*/}
-                  {/*    className: `!w-5 !h-5 ${color}`,*/}
-                  {/*  })}*/}
-                  {/*</div>*/}
                   <div>
                     <Typography
                       variant="small"
@@ -236,7 +223,13 @@ export function Home() {
             )}
           </CardBody>
         </Card>
-        <Card className="border border-blue-gray-100 shadow-sm">
+
+  */
+
+  return (
+    <div className="mt-12">
+      <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-2">
+        <Card className="border border-blue-gray-100 shadow-sm col-span-1">
           <CardHeader
             floated={false}
             shadow={false}
@@ -244,7 +237,7 @@ export function Home() {
             className="m-0 p-6"
           >
             <Typography variant="h6" color="blue-gray" className="mb-2">
-              Próximas Mediações
+              Últimas Mediações agendadas
             </Typography>
             {/*<Typography*/}
             {/*  variant="small"*/}
@@ -267,15 +260,15 @@ export function Home() {
               ))}
             </ul>
           </CardBody>
-        </Card>
-        <Card className="" style={{background: 'none', boxShadow: 'none'}}>
+        </Card> 
+        <Card className="col-span-1" style={{background: 'none', boxShadow: 'none'}}>
           <Card className="mb-6" style={{backgroundColor: '#93c9f8'}}>
             <CardBody className="text-center">
               <Typography variant="h4" color="blue-gray" className="mb-2">
                 {conciliationStatistics.waiting}
               </Typography>
               <Typography color="blue-gray" className="font-bold text-blue-gray-800" textGradient>
-                Mediações Aguardando
+                Novas
               </Typography>
               {/*<Typography color="blue-gray" className="font-medium text-xs" textGradient>*/}
               {/*  Novembro 2023*/}
@@ -288,7 +281,7 @@ export function Home() {
                 {conciliationStatistics.scheduled}
               </Typography>
               <Typography color="blue-gray" className="font-bold text-blue-gray-800" textGradient>
-                Mediações Agendadas
+                Agendadas
               </Typography>
               {/*<Typography color="blue-gray" className="font-medium text-xs" textGradient>*/}
               {/*  Novembro 2023*/}
@@ -301,7 +294,7 @@ export function Home() {
                 {conciliationStatistics.finished}
               </Typography>
               <Typography color="blue-gray" className="font-bold text-blue-gray-800" textGradient>
-                Mediações Realizadas
+                Concluídas
               </Typography>
               {/*<Typography color="blue-gray" className="font-medium text-xs" textGradient>*/}
               {/*  Novembro 2023*/}
@@ -314,7 +307,7 @@ export function Home() {
                 {conciliationStatistics.canceled}
               </Typography>
               <Typography color="blue-gray" className="font-bold text-blue-gray-800" textGradient>
-                Mediações Canceladas
+                Canceladas
               </Typography>
               {/*<Typography color="blue-gray" className="font-medium text-xs" textGradient>*/}
               {/*  Novembro 2023*/}
@@ -341,7 +334,7 @@ export function Home() {
       {/*    />*/}
       {/*  ))}*/}
       {/*</div>*/}
-      <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-2">
+      {/* <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-2">
         {statisticsChartsData.map((props,index) => {
           if(index !== 1) return
           return (
@@ -410,7 +403,7 @@ export function Home() {
             )}
           </CardBody>
         </Card>
-      </div>
+      </div> */}
       {/*<div className="mb-4 grid grid-cols-1 gap-6 xl:grid-cols-3">*/}
       {/*  <Card className="overflow-hidden xl:col-span-2 border border-blue-gray-100 shadow-sm">*/}
       {/*    <CardHeader*/}

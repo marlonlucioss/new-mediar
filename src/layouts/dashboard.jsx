@@ -93,7 +93,14 @@ export function Dashboard() {
       return response;
     } catch (error) {
       // handle error
-      setErrorMessage("Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.");
+      let errorMsg = "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.";
+      
+      // Check if the error response has a specific error message pattern
+      if (error.response && error.response.data && error.response.data.error) {
+        errorMsg = error.response.data.error;
+      }
+      
+      setErrorMessage(errorMsg);
       setIsErrorModalOpen(true);
       setLoading(false);
       throw error;
@@ -124,8 +131,8 @@ export function Dashboard() {
       />
       <div className="p-4 xl:ml-80">
         <DashboardNavbar />
-        <Configurator />
-        <IconButton
+        {/* <Configurator /> */}
+        {/* <IconButton
           size="lg"
           color="white"
           className="fixed bottom-8 right-8 z-40 rounded-full shadow-blue-gray-900/10"
@@ -133,7 +140,7 @@ export function Dashboard() {
           onClick={() => setOpenConfigurator(dispatch, true)}
         >
           <Cog6ToothIcon className="h-5 w-5" />
-        </IconButton>
+        </IconButton> */}
         { !page && (
           <Routes>
             {routes.map(

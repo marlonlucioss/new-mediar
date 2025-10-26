@@ -26,12 +26,12 @@ export default function PerfilAbout({data, setData}) {
         </div>
       )}
       {!isOnEdit && (
-        <div className="w-full flex" style={{borderRadius: '11px', padding: '30px', backgroundColor: '#E2E5F3'}}>
+        <div className="w-full flex" style={{borderRadius: '11px', padding: '30px', backgroundColor: '#F9F9F9'}}>
           {data.about}
         </div>
       )}
       {isOnEdit && (
-        <div className="w-full flex" style={{borderRadius: '11px', padding: '30px', backgroundColor: '#E2E5F3'}}>
+        <div className="w-full flex" style={{borderRadius: '11px', padding: '30px', backgroundColor: '#F9F9F9'}}>
           <textarea name="" id="" cols="30" rows="10" onChange={handleChange} style={{
             width: '100%',
             borderRadius: '10px',

@@ -90,7 +90,7 @@ export function ListaMediadores({ setPage, setData, data }) {
           </Card>
         ))}
       </Card>
-      <Card className='w-2/6'>
+      {/* <Card className='w-2/6'>
         <CardBody className="p-4">
           <div className="m-4">
             <Typography variant="h3" color="blue-gray" className="mb-7">
@@ -119,7 +119,7 @@ export function ListaMediadores({ setPage, setData, data }) {
             </Button>
           </div>
         </CardBody>
-      </Card>
+      </Card> */}
     </Card>
   );
 }

@@ -227,7 +227,7 @@ export function Perfil({ setPage }) {
         <CardBody className="px-0 p-6 pt-0">
           <PerfilHeader
             profileImage={profileImage}
-            userNameFromParent={data?.name}
+            userNameFromParent={data?.fullname}
             onImageUploadFromParent={handleProfileImageUpdate} 
           />
           <PerfilAbout data={data} setData={setData} />

@@ -12,18 +12,26 @@ import { useForm, Controller } from "react-hook-form"
 import {useEffect, useState} from "react";
 import InputMask from "react-input-mask";
 import {API_URL} from "@/config.js";
+import TermsModal from "@/components/TermsModal.jsx";
 
 export function SignIn() {
   const navigate = useNavigate();
   const [hasLogin, setHasLogin] = useState(false)
   const [displayRegister, setDisplayRegister] = useState(false)
+  const [showTermsModal, setShowTermsModal] = useState(false)
 
   const {
     register,
     handleSubmit,
     watch,
+    reset,
     formState: { errors },
-  } = useForm()
+  } = useForm({
+    defaultValues: {
+      email: '',
+      password: ''
+    }
+  })
 
   const {
     register: register2,
@@ -31,12 +39,33 @@ export function SignIn() {
     watch: watch2,
     control: control2,
     setValue: setValue2,
+    reset: reset2,
     formState: { errors: errors2 },
   } = useForm({
     defaultValues: {
-      tipoPessoa: 'fisica'
+      tipoPessoa: 'fisica',
+      terms: false
     }
   })
+
+  // Ensure all fields start empty on page load
+  useEffect(() => {
+    // Clear login form
+    reset({ email: '', password: '' });
+    // Clear registration form
+    reset2({
+      nome: '',
+      email: '',
+      telefone: '',
+      atividade: '',
+      tipoPessoa: 'fisica',
+      cpf: '',
+      cnpj: '',
+      password: '',
+      password_confirmation: '',
+      terms: false
+    });
+  }, [reset, reset2])
 
   const onSubmitLogin = (data) => callLogin(data)
 
@@ -77,7 +106,7 @@ export function SignIn() {
     // telefone-
     axios.post(API_URL + '/auth/signup', {
       email: data.email,
-      name: data.nome,
+      fullname: data.fullname,
       cpfCnpj: data.cpfCnpj,
       telefone: data.telefone,
       role: data.role,
@@ -128,20 +157,19 @@ export function SignIn() {
   }
 
   return (
-    <section className="flex gap-36 min-h-screen">
+    <section className="flex flex-col lg:flex-row gap-6 lg:gap-36 min-h-screen">
       {!hasLogin && (
         <>
-        <div className="w-full lg:w-6/12 mt-24 h-screen">
+        <div className="w-full lg:w-1/2 mt-8 lg:mt-24 px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <img
             src="/img/login-logo.svg"
-            className="h-full inline w-100 object-cover mb-20"
+            className="h-32 sm:h-40 md:h-48 lg:h-auto mx-auto object-contain mb-8 lg:mb-20"
+            alt="Mediar360"
           />
           <Typography variant="h2" className="font-bold mb-4">Login</Typography>
-          <Typography variant="paragraph" color="" style={{width: '348px',
-            height: '48px',
-            top: '69px',
-            left: '8px',
+          <Typography variant="paragraph" color="" style={{
+            maxWidth: '348px',
             fontSize: '14px',
             fontWeight: '500',
             color: '#828282',
@@ -149,9 +177,14 @@ export function SignIn() {
             letterSpacing: '0px',
             textAlign: 'center',
             margin: 'auto'
-          }} className="text-lg font-normal">Acesse a plataforma Mediar360 inserindo suas credenciais abaixo...</Typography>
+          }} className="text-base sm:text-lg font-normal px-4">Acesse a plataforma Mediar360 inserindo suas credenciais abaixo...</Typography>
         </div>
-        <form name='login' onSubmit={handleSubmit(onSubmitLogin)} className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
+        {/* Autofill bait inputs to discourage browser autofill on login */}
+        <div aria-hidden="true" className="opacity-0 h-0 w-0 overflow-hidden pointer-events-none">
+          <input type="text" autoComplete="username" tabIndex={-1} />
+          <input type="password" autoComplete="new-password" tabIndex={-1} />
+        </div>
+        <form name='login' onSubmit={handleSubmit(onSubmitLogin)} autoComplete="off" className="mt-8 mb-2 mx-auto w-full max-w-sm sm:max-w-md lg:w-1/2">
           <div className="mb-1 flex flex-col gap-6">
             <Input
               size="lg"
@@ -160,6 +193,10 @@ export function SignIn() {
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
+              autoComplete="off"
+              inputMode="email"
+              autoCorrect="off"
+              spellCheck={false}
               {...register("email", { required: true })}
             />
             {errors.email && <span className='text-red-600'>This field is required</span>}
@@ -171,6 +208,9 @@ export function SignIn() {
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
+              autoComplete="new-password"
+              autoCorrect="off"
+              spellCheck={false}
               {...register("password", { required: true })}
             />
             {errors.password && <span className='text-red-600'>This field is required</span>}
@@ -204,7 +244,7 @@ export function SignIn() {
           <Button onClick={() => setDisplayRegister(true)} type='button' className="mt-2" style={{color: '#11AFE4', backgroundColor: 'rgb(17 175 228 / 15%)'}} fullWidth>
             Cadastre-se
           </Button>
-          <div className="flex items-center text-center justify-center gap-2 mt-20">
+          <div className="flex items-center text-center justify-center gap-2 mt-5">
             {/*<Checkbox*/}
             {/*  label={*/}
             {/*    <Typography*/}
@@ -251,15 +291,32 @@ export function SignIn() {
           {/*</Typography>*/}
         </form>
       </div>
-      <div className="w-5/5 lg:block h-screen" style={{position: 'relative'}}>
+      <div className="w-full lg:w-1/2 relative">
         {displayRegister && (
           <div className='register-form' style={{
-          position: 'absolute',
-          backgroundColor: '#86c1d8cc',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          // Apply background image with a semi-transparent tint overlay
+          background: "linear-gradient(0deg, rgba(134,193,216,0.5), rgba(134,193,216,0.5)), url('/img/login-image.svg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'top center',
+          backgroundRepeat: 'no-repeat',
           width: '100%',
           height: '100%',
-          paddingTop: '40px'
+          paddingTop: '40px',
+          overflowY: 'auto',
+          zIndex: 50
         }}>
+          <button
+            onClick={() => setDisplayRegister(false)}
+            className="absolute top-4 right-4 bg-white/90 hover:bg-white text-gray-700 rounded-full p-2 shadow focus:outline-none focus:ring-2 focus:ring-white"
+            aria-label="Fechar cadastro"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
           <Typography variant="paragraph" color="" style={{
             height: '48px',
             top: '69px',
@@ -272,10 +329,8 @@ export function SignIn() {
             textAlign: 'center',
             margin: 'auto'
           }} className="text-lg font-normal">Bem vindo!</Typography>
-          <Typography variant="paragraph" color="" style={{width: '348px',
-            height: '48px',
-            top: '69px',
-            left: '8px',
+          <Typography variant="paragraph" color="" style={{
+            maxWidth: '640px',
             fontSize: '18px',
             fontWeight: '500',
             color: '#fff',
@@ -283,9 +338,16 @@ export function SignIn() {
             letterSpacing: '0px',
             textAlign: 'center',
             margin: 'auto'
-          }} className="text-lg font-normal">Acesse a plataforma Mediar360 inserindo suas informações abaixo..</Typography>
-          <form name='register' onSubmit={handleSubmit2(onSubmitRegister)} className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
-            <div className="mb-1 flex flex-col gap-6">
+          }} className="text-base sm:text-lg font-normal px-4">Acesse a plataforma Mediar360 inserindo suas informações abaixo..</Typography>
+          {/* Autofill bait inputs to discourage browser autofill */}
+          <div aria-hidden="true" className="opacity-0 h-0 w-0 overflow-hidden pointer-events-none">
+            <input type="text" autoComplete="username" tabIndex={-1} />
+            <input type="password" autoComplete="new-password" tabIndex={-1} />
+            <input type="email" autoComplete="email" tabIndex={-1} />
+            <input type="tel" autoComplete="tel" tabIndex={-1} />
+          </div>
+          <form name='register' onSubmit={handleSubmit2(onSubmitRegister)} autoComplete="off" noValidate className="mt-8 mb-2 mx-auto w-full max-w-sm sm:max-w-md lg:max-w-lg px-4">
+            <div className="mb-1 flex flex-col gap-3">
               <Input
                 size="lg"
                 placeholder="Nome completo"
@@ -293,10 +355,13 @@ export function SignIn() {
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
-                error={!!errors2.nome}
-                {...register2("nome", { required: "Campo obrigatório" })}
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+                error={!!errors2.fullname}
+                {...register2("fullname", { required: "Campo obrigatório" })}
               />
-              {errors2.nome && <span className='text-red-600 block' style={{ marginTop: '-23px' }}>{errors2.nome.message}</span>}
+              {errors2.fullname && <span className='text-red-600 block' style={{ marginTop: '-23px' }}>{errors2.nome.message}</span>}
               <Input
                 size="lg"
                 placeholder="Email"
@@ -304,6 +369,10 @@ export function SignIn() {
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
+                autoComplete="off"
+                inputMode="email"
+                autoCorrect="off"
+                spellCheck={false}
                 error={!!errors2.email}
                 {...register2("email", { 
                   required: "Campo obrigatório",
@@ -339,6 +408,10 @@ export function SignIn() {
                     labelProps={{
                       className: "before:content-none after:content-none",
                     }}
+                    autoComplete="off"
+                    inputMode="tel"
+                    autoCorrect="off"
+                    spellCheck={false}
                     error={!!errors2.telefone}
                   />
                 )}
@@ -425,6 +498,10 @@ export function SignIn() {
                             labelProps={{
                               className: "before:content-none after:content-none",
                             }}
+                            autoComplete="off"
+                            inputMode="numeric"
+                            autoCorrect="off"
+                            spellCheck={false}
                             error={!!errors2.cpf}
                           />
                         )}
@@ -464,6 +541,10 @@ export function SignIn() {
                             labelProps={{
                               className: "before:content-none after:content-none",
                             }}
+                            autoComplete="off"
+                            inputMode="numeric"
+                            autoCorrect="off"
+                            spellCheck={false}
                             error={!!errors2.cnpj}
                           />
                         )}
@@ -474,9 +555,8 @@ export function SignIn() {
                 </>
               )}
 
-              <Typography variant="paragraph" color="" style={{width: '348px',
-                top: '69px',
-                left: '8px',
+              <Typography variant="paragraph" color="" style={{
+                maxWidth: '640px',
                 fontSize: '18px',
                 fontWeight: '500',
                 color: '#fff',
@@ -484,7 +564,7 @@ export function SignIn() {
                 letterSpacing: '0px',
                 textAlign: 'center',
                 margin: 'auto'
-              }} className="text-xl font-normal">Crie sua senha</Typography>
+              }} className="text-xl font-normal px-4">Crie sua senha</Typography>
               <Input
                 type="password"
                 size="lg"
@@ -493,6 +573,9 @@ export function SignIn() {
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
+                autoComplete="new-password"
+                autoCorrect="off"
+                spellCheck={false}
                 error={!!errors2.password}
                 {...register2("password", { 
                   required: "Campo obrigatório",
@@ -500,9 +583,8 @@ export function SignIn() {
                 })}
               />
               {errors2.password && <span className='text-red-600 block' style={{ marginTop: '-23px' }}>{errors2.password.message}</span>}
-              <Typography variant="paragraph" color="" style={{width: '348px',
-                top: '69px',
-                left: '8px',
+              <Typography variant="paragraph" color="" style={{
+                maxWidth: '640px',
                 fontSize: '18px',
                 fontWeight: '500',
                 color: '#fff',
@@ -510,7 +592,7 @@ export function SignIn() {
                 letterSpacing: '0px',
                 textAlign: 'center',
                 margin: 'auto'
-              }} className="text-lg font-normal">Repita a senha</Typography>
+              }} className="text-lg font-normal px-4">Repita a senha</Typography>
               <Input
                 type="password"
                 size="lg"
@@ -519,6 +601,9 @@ export function SignIn() {
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
+                autoComplete="new-password"
+                autoCorrect="off"
+                spellCheck={false}
                 error={!!errors2.password_confirmation}
                 {...register2("password_confirmation", { 
                   required: "Campo obrigatório",
@@ -527,22 +612,38 @@ export function SignIn() {
               />
               {errors2.password_confirmation && <span className='text-red-600 block' style={{ marginTop: '-23px' }}>{errors2.password_confirmation.message}</span>}
             </div>
-            <Checkbox
-              label={
-                <Typography color="white" className="flex font-medium">
-                  Eu concordo com os
-                  <Typography
-                    as="a"
-                    href="#"
-                    color="blue"
-                    className="font-medium transition-colors hover:text-blue-700"
-                  >
-                    &nbsp;termos e condições.
-                  </Typography>
-                </Typography>
-              }
+            <Controller
+              name="terms"
+              control={control2}
+              rules={{ required: "Você deve aceitar os termos e condições" }}
+              render={({ field }) => (
+                <Checkbox
+                  checked={!!field.value}
+                  onChange={(e) => field.onChange(e.target.checked)}
+                  label={
+                    <Typography color="white" className="flex font-medium">
+                      Eu concordo com os
+                      <Typography
+                        as="a"
+                        href="#"
+                        color="blue"
+                        className="font-medium transition-colors hover:text-blue-700 cursor-pointer"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setShowTermsModal(true);
+                        }}
+                      >
+                        &nbsp;termos e condições.
+                      </Typography>
+                    </Typography>
+                  }
+                />
+              )}
             />
-            <Button type='submit' className="mt-10" style={{color: 'white', backgroundColor: '#11AFE4'}} fullWidth>
+            {errors2.terms && (
+              <span className='text-red-600 block' style={{ marginTop: '-10px' }}>{errors2.terms.message}</span>
+            )}
+            <Button type='submit' className="mt-3" style={{color: 'white', backgroundColor: '#11AFE4'}} fullWidth>
               Cadastrar!
             </Button>
           </form>
@@ -550,11 +651,17 @@ export function SignIn() {
         }
         <img
           src="/img/login-image.svg"
-          className="object-cover w-full h-full"
+          className="object-cover w-full h-48 sm:h-72 md:h-full rounded-none lg:rounded-none"
+          alt="Mediar360 background"
         />
         </div>
         </>
       )}
+      
+      <TermsModal 
+        open={showTermsModal} 
+        onClose={() => setShowTermsModal(false)} 
+      />
     </section>
   );
 }

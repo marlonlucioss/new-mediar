@@ -248,7 +248,7 @@ export function Step1({ setPage, setData, requestData }) {
           </form>
         </CardBody>
       </Card>
-      <Card className='w-2/6 shadow-none'>
+      {/* <Card className='w-2/6 shadow-none'>
         <CardBody className="p-4">
           <div className="m-4">
             <Typography variant="h3" color="blue-gray" className="mb-7">
@@ -262,6 +262,6 @@ export function Step1({ setPage, setData, requestData }) {
             </Typography>
           </div>
         </CardBody>
-      </Card>
+      </Card> */}
     </Card>
   )};
