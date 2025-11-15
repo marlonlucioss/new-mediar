@@ -14,7 +14,7 @@ import {
   CogIcon, QueueListIcon,
 } from "@heroicons/react/24/solid";
 import { Home, Profile, Tables, Notifications } from "@/pages/dashboard";
-import { SignIn, SignUp } from "@/pages/auth";
+import { SignIn, SignUp, PasswordRecovery, PasswordReset } from "@/pages/auth";
 import {Calendario} from "@/pages/dashboard/calendario.jsx";
 import ProximasMediacoes from "@/pages/dashboard/proximas-mediacoes.jsx";
 import Agenda from "@/pages/dashboard/agenda.jsx";
@@ -135,6 +135,18 @@ export const routes = [
         name: "Cadastrar",
         path: "/sign-up",
         element: <SignUp />,
+      },
+      {
+        name: "Recuperar Senha",
+        path: "/password-recovery",
+        element: <PasswordRecovery />,
+        hidden: true,
+      },
+      {
+        name: "Redefinir Senha",
+        path: "/password-reset",
+        element: <PasswordReset />,
+        hidden: true,
       },
     ],
   },

@@ -1,4 +1,4 @@
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { Cog6ToothIcon } from "@heroicons/react/24/solid";
 import { IconButton, Dialog, DialogHeader, DialogBody, DialogFooter, Button as MTButton } from "@material-tailwind/react";
 import {
@@ -27,6 +27,7 @@ import {Step1Cliente} from "@/pages/dashboard/form-finalizar-mediacao/step1.jsx"
 
 export function Dashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [controller, dispatch] = useMaterialTailwindController();
   const { sidenavType } = controller;
   const [page, setPage] = useState(null);
@@ -38,7 +39,10 @@ export function Dashboard() {
   useEffect(() => {
     const mediarData = localStorage.getItem('mediar');
     if (!mediarData) {
-      navigate('/auth/sign-in');
+      // Don't redirect if user is on password reset page
+      if (!location.pathname.includes('/auth/password-reset')) {
+        navigate('/auth/sign-in');
+      }
       return;
     }
   }, []);

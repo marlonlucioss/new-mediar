@@ -35,7 +35,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import {InformationCircleIcon} from "@heroicons/react/24/outline/index.js";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {API_URL} from "@/config.js";
 const events = [
   { title: 'Meeting', start: new Date() }
@@ -67,6 +67,7 @@ const handleEventClick = (selected) => {
 };
 export function Home() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [currentEvents, setCurrentEvents] = useState([]);
   const [nextConciliationList, setNextConciliationList] = useState([]);
   const [conciliationStatistics, setConciliationStatistics] = useState({
@@ -92,7 +93,10 @@ export function Home() {
   useEffect(() => {
     const mediarData = localStorage.getItem('mediar');
     if (!mediarData) {
-      navigate('/auth/sign-in');
+      // Don't redirect if user is on password reset page
+      if (!location.pathname.includes('/auth/password-reset')) {
+        navigate('/auth/sign-in');
+      }
       return;
     }
     const token = JSON.parse(mediarData).token

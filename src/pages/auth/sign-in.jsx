@@ -258,9 +258,9 @@ export function SignIn() {
             {/*  containerProps={{ className: "-ml-2.5" }}*/}
             {/*/>*/}
             <Typography variant="small" className="font-medium text-gray-900">
-              <a href="#">
+              <Link to="/auth/password-recovery">
                 Esqueci minha senha
-              </a>
+              </Link>
             </Typography>
           </div>
           {/*<div className="space-y-4 mt-8">*/}

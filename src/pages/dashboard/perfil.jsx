@@ -18,7 +18,7 @@ import {
   Cog6ToothIcon,
   PencilIcon,
 } from "@heroicons/react/24/solid";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { ProfileInfoCard, MessageCard } from "@/widgets/cards";
 import {platformSettingsData, conversationsData, projectsData, ordersOverviewData, authorsTableData} from "@/data";
 import {StarIcon} from "@heroicons/react/24/solid/index.js";
@@ -102,12 +102,16 @@ const handleEventClick = (selected) => {
 
 export function Perfil({ setPage }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const mediarData = localStorage.getItem('mediar');
   const [data, setData] = useState(mediarData ? JSON.parse(mediarData)?.user || {} : {});
 
   useEffect(() => {
     if (!mediarData) {
-      navigate('/auth/sign-in');
+      // Don't redirect if user is on password reset page
+      if (!location.pathname.includes('/auth/password-reset')) {
+        navigate('/auth/sign-in');
+      }
       return;
     }
   }, []);

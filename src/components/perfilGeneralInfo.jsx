@@ -35,7 +35,14 @@ export default function PerfilGeneralInfo({data, setData}) {
   const [fullname, setFullname] = useState(data?.fullname || '')
   const [name, setName] = useState(data?.name || '')
   const [rg, setRg] = useState(data?.rg || '')
-  const [naturality, setNaturality] = useState(data?.naturality ? new Date(data.naturality.split('/').reverse().join('-')) : undefined); // Attempt to parse DD/MM/YYYY from data or YYYY-MM-DD
+  const [naturality, setNaturality] = useState(data?.naturality ? (() => {
+    // Parse date string as local date to avoid timezone issues
+    const dateStr = data.naturality.includes('/') 
+      ? data.naturality.split('/').reverse().join('-') // Convert DD/MM/YYYY to YYYY-MM-DD
+      : data.naturality; // Already in YYYY-MM-DD format
+    const [year, month, day] = dateStr.split('-');
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day)); // Create local date
+  })() : undefined);
   const [gender, setGender] = useState(data?.gender || '');
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   return (
@@ -138,6 +145,7 @@ export default function PerfilGeneralInfo({data, setData}) {
                       <DayPicker
                         mode="single"
                         selected={naturality}
+                        defaultMonth={naturality || new Date()}
                         onSelect={(date) => { setNaturality(date); setIsDatePickerOpen(false); }}
                         locale={ptBR}
                         captionLayout="dropdown"

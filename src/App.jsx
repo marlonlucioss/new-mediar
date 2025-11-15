@@ -1,15 +1,20 @@
-import {Routes, Route, Navigate, useNavigate} from "react-router-dom";
+import {Routes, Route, Navigate, useNavigate, useLocation} from "react-router-dom";
 import { Dashboard, Auth } from "@/layouts";
 import {useEffect, useState} from "react";
 import { API_URL } from "./config";
 
 function App() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [hasLogin, setHasLogin] = useState(true)
 
   const checkSession = async () => {
     const account = JSON.parse(localStorage.getItem('mediar'));
     if (!account?.token) {
+      // Don't redirect if user is on password reset page
+      if (location.pathname.includes('/auth/password-reset')) {
+        return;
+      }
       navigate("/auth/sign-in");
       return;
     }
@@ -36,7 +41,10 @@ function App() {
     } catch (error) {
       console.error('Session check failed:', error);
       localStorage.removeItem('mediar');
-      navigate("/auth/sign-in");
+      // Don't redirect if user is on password reset page
+      if (!location.pathname.includes('/auth/password-reset')) {
+        navigate("/auth/sign-in");
+      }
     }
   };
 
@@ -47,7 +55,10 @@ function App() {
   window.addEventListener('storage', () => {
     const item = JSON.parse(localStorage.getItem('mediar'))
     if (!item?.token) {
-      navigate("/auth/sign-in");
+      // Don't redirect if user is on password reset page
+      if (!location.pathname.includes('/auth/password-reset')) {
+        navigate("/auth/sign-in");
+      }
     }
   });
 

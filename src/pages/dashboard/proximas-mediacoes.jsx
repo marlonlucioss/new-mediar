@@ -19,7 +19,7 @@ import {
   PencilIcon,
   ArrowPathIcon,
 } from "@heroicons/react/24/solid";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { ProfileInfoCard, MessageCard } from "@/widgets/cards";
 import {platformSettingsData, conversationsData, projectsData, ordersOverviewData, authorsTableData} from "@/data";
 import {StarIcon} from "@heroicons/react/24/solid/index.js";
@@ -40,6 +40,7 @@ import { useMediacaoData } from "@/hooks/useMediacaoData";
 
 function ProximasMediacoes() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
   const [loading, setLoading] = useState(true);
   const { data: requestData, updateData, clearData, navigateToStep } = useMediacaoData();
@@ -207,7 +208,10 @@ function ProximasMediacoes() {
     try {
       const mediarData = localStorage.getItem('mediar');
       if (!mediarData) {
-        navigate('/auth/sign-in');
+        // Don't redirect if user is on password reset page
+        if (!location.pathname.includes('/auth/password-reset')) {
+          navigate('/auth/sign-in');
+        }
         return;
       }
       const token = JSON.parse(mediarData).token;
