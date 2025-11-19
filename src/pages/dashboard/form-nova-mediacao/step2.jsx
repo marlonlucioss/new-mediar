@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Card,
   CardHeader,
@@ -53,7 +53,20 @@ export function Step2({ setPage, setData, requestData }) {
     handleSubmit,
     watch,
     formState: { errors },
+    reset
   } = useForm()
+
+  // Reset form when starting a new mediation (when requestData is empty)
+  useEffect(() => {
+    if (!requestData || Object.keys(requestData).length === 0) {
+      reset({
+        numero_processo: '',
+        objeto_disputa: '',
+        resumo_disputa: ''
+      });
+    }
+  }, [requestData, reset]);
+
   const onSubmit = (data) => {
     setData({...requestData, ...data})
     setPage('step3')

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Card,
   CardHeader,
@@ -54,7 +54,21 @@ export function Step1({ setPage, setData, requestData }) {
     handleSubmit,
     watch,
     formState: { errors },
+    reset
   } = useForm()
+
+  // Reset form when starting a new mediation (when requestData is empty)
+  useEffect(() => {
+    if (!requestData || Object.keys(requestData).length === 0) {
+      reset({
+        nome_cliente: '',
+        cpf_cliente: '',
+        telefone_cliente: '',
+        email_cliente: ''
+      });
+    }
+  }, [requestData, reset]);
+
   const onSubmit = (data) => {
     setData({...requestData, ...data})
     setPage('step2')
@@ -101,7 +115,6 @@ export function Step1({ setPage, setData, requestData }) {
                 {...register("nome_cliente", { 
                   required: "Nome é obrigatório.",
                   minLength: { value: 3, message: "Nome deve ter pelo menos 3 caracteres." },
-                  pattern: { value: /^[A-Za-zÀ-ú\s]+$/, message: "Nome deve conter apenas letras e espaços." }
                 })}
               />
               {errors.nome_cliente && <Typography variant="small" color="red" className="mt-1">{errors.nome_cliente.message}</Typography>}

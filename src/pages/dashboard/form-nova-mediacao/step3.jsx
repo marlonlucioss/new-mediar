@@ -53,6 +53,19 @@ export function Step3({ setPage, setData, requestData, callCreateConciliation, l
 
   const [submittedData, setSubmittedData] = React.useState(null);
 
+  // Reset form when starting a new mediation (when requestData is empty)
+  useEffect(() => {
+    if (!requestData || Object.keys(requestData).length === 0) {
+      reset({
+        valor_causa: '',
+        valor_proposta: '',
+        validade_proposta: null,
+        proposta: '',
+        observacoes: ''
+      });
+    }
+  }, [requestData, reset]);
+
   useEffect(() => {
     if (submittedData) {
       handleSubmission();
@@ -63,6 +76,7 @@ export function Step3({ setPage, setData, requestData, callCreateConciliation, l
       try {
         const response = await callCreateConciliation();
         if (response.status === 200) {
+          // Reset this step's form
           reset({
             valor_causa: '',
             valor_proposta: '',
@@ -70,6 +84,8 @@ export function Step3({ setPage, setData, requestData, callCreateConciliation, l
             proposta: '',
             observacoes: ''
           });
+          // Reset parent data state to clear all form data
+          setData({});
         }
         setSubmittedData(null); // Reset the submitted data
       } catch (error) {
