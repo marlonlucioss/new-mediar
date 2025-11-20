@@ -69,7 +69,7 @@ export function DashboardNavbar() {
 
   const callLogout = () => {
     localStorage.removeItem('mediar')
-    setTimeout(() => navigate("/"), 1000)
+    setTimeout(() => navigate("/auth/sign-in"), 1000)
   }
 
   return (

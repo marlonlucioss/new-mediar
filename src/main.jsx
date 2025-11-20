@@ -12,7 +12,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import { BrowserRouter } from "react-router-dom";
+import { HashRouter } from "react-router-dom";
 import { ThemeProvider } from "@material-tailwind/react";
 import { MaterialTailwindControllerProvider } from "@/context";
 import { MediacaoProvider } from "./contexts/MediacaoContext";
@@ -21,7 +21,7 @@ import "../public/css/styles.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <HashRouter>
       <ThemeProvider>
         <MaterialTailwindControllerProvider>
           <MediacaoProvider>
@@ -29,6 +29,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           </MediacaoProvider>
         </MaterialTailwindControllerProvider>
       </ThemeProvider>
-    </BrowserRouter>
+    </HashRouter>
   </React.StrictMode>
 );
