@@ -1,6 +1,6 @@
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { Cog6ToothIcon } from "@heroicons/react/24/solid";
-import { IconButton, Dialog, DialogHeader, DialogBody, DialogFooter, Button as MTButton } from "@material-tailwind/react";
+import { IconButton, Dialog, DialogHeader, DialogBody, DialogFooter, Button as MTButton, Typography } from "@material-tailwind/react";
 import {
   Sidenav,
   DashboardNavbar,
@@ -33,6 +33,7 @@ export function Dashboard() {
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState({});
+  const [successData, setSuccessData] = useState(null);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -92,7 +93,16 @@ export function Dashboard() {
         }
       });
       // handle success
+      console.log('POST response received:', response.data);
+      console.log('Current data before merge:', data);
+      // Store the complete response data for the success page
+      const newData = { ...data, ...response.data };
+      console.log('Setting success data to:', newData);
+      console.log('About to setSuccessData and setPage to step4');
+      setSuccessData(newData);
+      console.log('Success data set, now setting page to step4');
       setPage('step4');
+      console.log('Page set to step4');
       setLoading(false);
       return response;
     } catch (error) {
@@ -168,7 +178,12 @@ export function Dashboard() {
           <Step3 setPage={setPage} setData={setData} requestData={data} callCreateConciliation={callCreateConciliation} loading={loading} />
         )}
         { page === 'step4' && (
-          <SuccessScheduling setPage={setPage} setData={setData} requestData={data} />
+          <>
+            {console.log('Rendering SuccessScheduling with successData:', successData)}
+            {console.log('SuccessData exists:', !!successData)}
+            {console.log('SuccessData keys length:', successData ? Object.keys(successData).length : 0)}
+            <SuccessScheduling setPage={setPage} setData={setData} requestData={successData} loading={loading} />
+          </>
         )}
 
         <div className="text-blue-gray-600">

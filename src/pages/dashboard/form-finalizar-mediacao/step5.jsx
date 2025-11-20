@@ -263,10 +263,10 @@ const removeKeyRecursively = (obj, keyToRemove) => {
     })
       .then(function (response) {
         console.log('response', response)
-        // Clear mediation data from context
-        clearData();
+        // Store the complete response data for the success page
+        updateData({ ...requestData, ...response.data });
         
-        // Navigate to success page
+        // Navigate to success page with the response data
         navigateToStep('success');
       })
       .catch(function (error) {

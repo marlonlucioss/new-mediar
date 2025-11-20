@@ -70,10 +70,38 @@ export function Step3Cliente() {
 
   return (
     <Card className='w-full' style={{flexFlow: 'wrap', boxShadow: 'none'}}>
-      <Card className='w-4/6 mt-6 gap-9' style={{flexFlow: 'wrap', boxShadow: 'none'}}>
+      <Card className="w-4/6 shadow-none">
+        <CardHeader
+          color="white"
+          floated={false}
+          shadow={false}
+          className="m-0 px-4 py-8 inline-flex"
+        >
+          {/*<div className="mb-4 h-20 p-6 text-white">*/}
+          {/*  {type === "card" ? (*/}
+          {/*    <CreditCardIcon className="h-10 w-10 text-white" />*/}
+          {/*  ) : (*/}
+          {/*    <img alt="paypal " className="w-14 " src="https://docs.material-tailwind.com/icons/paypall.png" />*/}
+          {/*  )}*/}
+          {/*</div>*/}
+          <Typography variant="h3">Nova Mediação</Typography>
+          <Typography variant="h5" style={{lineHeight: '48px'}} className='font-light ml-6'>Escolha o mediador</Typography>
+        </CardHeader>
+        <CardBody>
         {isLoading ? (
           <div className="flex items-center justify-center w-full h-64">
             <Spinner className="h-12 w-12" />
+          </div>
+        ) : usersList.length === 0 ? (
+          <div className="flex items-center justify-center w-full h-64">
+            <div className="text-center">
+              <Typography variant="h6" color="blue-gray" className="mb-2">
+                Nenhum mediador disponível
+              </Typography>
+              <Typography variant="small" color="gray">
+                Não existem mediadores disponíveis na plataforma no momento.
+              </Typography>
+            </div>
           </div>
         ) : (
           usersList.map((user, index) => (
@@ -89,6 +117,7 @@ export function Step3Cliente() {
               backgroundColor: requestData?.mediador?._id === user._id ? '#f0f9ff' : 'white'
             }}
           >
+            
             <CardBody>
               <img style={{display: 'inline'}} src="/img/andrea-lista.png" alt=""/>
               <div>
@@ -120,6 +149,7 @@ export function Step3Cliente() {
           </Card>
         ))
         )}
+      </CardBody>
       </Card>
       {/* <Card className='w-2/6'>
         <CardBody className="p-0 pt-20 pr-4 w-full">
