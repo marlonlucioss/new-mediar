@@ -11,6 +11,7 @@ import {
   Switch,
   Tooltip,
   Button, Popover, PopoverHandler, PopoverContent,
+  Dialog, DialogHeader, DialogBody, DialogFooter,
 } from "@material-tailwind/react";
 import {
   HomeIcon,
@@ -24,7 +25,7 @@ import { ProfileInfoCard, MessageCard } from "@/widgets/cards";
 import {platformSettingsData, conversationsData, projectsData, ordersOverviewData, authorsTableData} from "@/data";
 import {StarIcon} from "@heroicons/react/24/solid/index.js";
 import React, {useEffect, useState} from "react";
-import {ComputerDesktopIcon, PlusIcon} from "@heroicons/react/24/outline/index.js";
+import {ComputerDesktopIcon, PlusIcon, EyeIcon} from "@heroicons/react/24/outline/index.js";
 import Pagination from "@/components/pagination.jsx";
 import {ChevronLeftIcon, ChevronRightIcon} from "@heroicons/react/20/solid";
 import axios from "axios";
@@ -47,6 +48,8 @@ function ProximasMediacoes() {
   const [conciliationList, setConciliationList] = useState([]);
   const [page, setPage] = useState(null);
   const [activeTab, setActiveTab] = useState("aguardando");
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedConciliation, setSelectedConciliation] = useState(null);
   const scrollContainerRef = React.useRef(null);
 
   // Reset sort config when switching to tabs with automatic date sorting
@@ -201,6 +204,133 @@ function ProximasMediacoes() {
       console.error('Error concluding conciliation:', error);
       alert('Erro ao concluir mediação. Por favor, tente novamente.');
     }
+  }
+
+  // Helper functions for formatting data in modal
+  const formatDate = (dateString) => {
+    if (!dateString) return "Data não especificada";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      weekday: 'long'
+    });
+  }
+
+  const formatDateTime = (dateString) => {
+    if (!dateString) return "Data não especificada";
+    const date = new Date(dateString);
+    return date.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  const formatCurrency = (value) => {
+    if (!value) return "Não informado";
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  }
+
+  // Helper function to render action buttons based on user role and status
+  const renderActionButtons = (userRole, status, currentItem) => {
+    const buttons = [];
+
+    // Eye button - always present for all roles
+    buttons.push(
+      <button
+        key="view"
+        onClick={() => {
+          setSelectedConciliation(currentItem);
+          setShowDetailsModal(true);
+        }}
+        className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs shadow-md shadow-gray-900/10 hover:shadow-lg focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded bg-[#fff] text-blue-600"
+        type="button">
+        <span className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+          <EyeIcon className="h-4 w-4" />
+        </span>
+      </button>
+    );
+
+    // Role and status specific buttons
+    if (userRole === 'cliente' && status === 'aguardando') {
+      buttons.push(
+        <button
+          key="schedule"
+          onClick={() => {
+            clearData();
+            console.log(currentItem);
+            setTimeout(() => {
+              updateData(currentItem);
+              navigateToStep('step1');
+            }, 1000);
+          }}
+          className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs shadow-md shadow-gray-900/10 hover:shadow-lg focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded bg-[#fff] text-green-600"
+          type="button">
+          <span className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+            <i className="text-lg fa-solid fa-calendar" aria-hidden="true"></i>
+          </span>
+        </button>
+      );
+    }
+
+    if (userRole === 'empresa' && status === 'aguardando') {
+      buttons.push(
+        <button
+          key="delete"
+          onClick={() => {
+            deleteConciliation(currentItem._id);
+          }}
+          className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs shadow-md shadow-gray-900/10 hover:shadow-lg focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded bg-[#fff] text-red-600"
+          type="button">
+          <span className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+            <i className="text-lg fa-solid fa-close" aria-hidden="true"></i>
+          </span>
+        </button>
+      );
+    }
+
+    if (userRole === 'mediador' && status === 'agendada') {
+      buttons.push(
+        <button
+          key="conclude"
+          onClick={() => {
+            concludeConciliation(currentItem._id);
+          }}
+          className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs shadow-md shadow-gray-900/10 hover:shadow-lg focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded bg-[#fff] text-green-600"
+          type="button">
+          <span className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+            <i className="text-lg fa-solid fa-check" aria-hidden="true"></i>
+          </span>
+        </button>,
+        <button
+          key="delete"
+          onClick={() => {
+            deleteConciliation(currentItem._id);
+          }}
+          className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs shadow-md shadow-gray-900/10 hover:shadow-lg focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded bg-[#fff] text-red-600"
+          type="button">
+          <span className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+            <i className="text-lg fa-solid fa-close" aria-hidden="true"></i>
+          </span>
+        </button>
+      );
+    }
+
+    return buttons;
+  }
+
+  // Helper function to check if popover should be shown
+  const shouldShowPopover = (userRole, status) => {
+    return (userRole === 'cliente' && status === 'aguardando') ||
+           (userRole === 'empresa' && status === 'aguardando') ||
+           (userRole === 'mediador' && status === 'agendada');
   }
 
   const fetchConciliations = async () => {
@@ -571,114 +701,29 @@ function ProximasMediacoes() {
                               </td>
                               <td className={`${baseClassName} text-center`}>
                                 <div className="flex justify-center">
-                                  {JSON.parse(localStorage.getItem('mediar')).user.role === 'cliente' && status === 'aguardando' && (
-                                    <Popover placement="top-end">
-                                      <PopoverHandler>
-                                        <button
-                                          className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs text-gray-900 hover:bg-gray-900/10 active:bg-gray-900/20 rounded-full"
-                                          type="button">
-                                          <span className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"><i
-                                            className="fas fa-regular fa-ellipsis-vertical"
-                                            aria-hidden="true"></i></span>
-                                        </button>
-                                      </PopoverHandler>
-                                    <PopoverContent>
-                                      <div className="flex items-center gap-4">
-                                        <button
-                                          onClick={() => {
-                                            // Clear mediation data from context
-                                            clearData();
-                                            
-                                            // Get current item from sorted list
-                                            const currentItem = sortedConciliationList[index];
-                                            console.log(currentItem);
-                                            // Update with fresh data
-                                            setTimeout(() => {
-                                              updateData(currentItem);
-                                              navigateToStep('step1');
-                                            }, 1000);
-                                          }}
-                                          className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs shadow-md shadow-gray-900/10 hover:shadow-lg focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded bg-[#fff] text-blue-600"
-                                          type="button">
-                                          <span
-                                            className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"><i
-                                            className="text-lg fa-solid fa-calendar"
-                                            aria-hidden="true"></i></span></button>
-                                        {/* Other buttons from original code can be added here if needed */}
-                                      </div>
-                                    </PopoverContent>
-                                  </Popover>
-                                )}
-                                {JSON.parse(localStorage.getItem('mediar')).user.role === 'empresa' && status === 'aguardando' && (
-                                  <Popover placement="top-end">
-                                    <PopoverHandler>
-                                      <button
-                                        className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs text-gray-900 hover:bg-gray-900/10 active:bg-gray-900/20 rounded-full"
-                                        type="button">
-                                        <span className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"><i
-                                          className="fas fa-regular fa-ellipsis-vertical"
-                                          aria-hidden="true"></i></span>
-                                      </button>
-                                    </PopoverHandler>
-                                    <PopoverContent>
-                                      <div className="flex items-center gap-4">
-                                        <button
-                                          onClick={() => {
-                                            const currentItem = sortedConciliationList[index]; // Use sorted list
-
-                                            deleteConciliation(currentItem._id);
-                                          }}
-                                          className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs shadow-md shadow-gray-900/10 hover:shadow-lg focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded bg-[#fff] text-red-600"
-                                          type="button">
-                                          <span
-                                            className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"><i
-                                            className="text-lg fa-solid fa-close"
-                                            aria-hidden="true"></i></span></button>
-                                        {/* Other buttons from original code can be added here if needed */}
-                                      </div>
-                                    </PopoverContent>
-                                  </Popover>
-                                )}
-                                {JSON.parse(localStorage.getItem('mediar')).user.role === 'mediador' && status === 'agendada' && (
-                                  <Popover placement="top-end">
-                                    <PopoverHandler>
-                                      <button
-                                        className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs text-gray-900 hover:bg-gray-900/10 active:bg-gray-900/20 rounded-full"
-                                        type="button">
-                                        <span className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"><i
-                                          className="fas fa-regular fa-ellipsis-vertical"
-                                          aria-hidden="true"></i></span>
-                                      </button>
-                                    </PopoverHandler>
-                                    <PopoverContent>
-                                      <div className="flex items-center gap-4">
-                                      <button
-                                          onClick={() => {
-                                            const currentItem = sortedConciliationList[index];
-                                            concludeConciliation(currentItem._id);
-                                          }}
-                                          className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs shadow-md shadow-gray-900/10 hover:shadow-lg focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded bg-[#fff] text-green-600"
-                                          type="button">
-                                          <span
-                                            className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"><i
-                                            className="text-lg fa-solid fa-check"
-                                            aria-hidden="true"></i></span></button>
-                                      <button
-                                          onClick={() => {
-                                            const currentItem = sortedConciliationList[index];
-                                            deleteConciliation(currentItem._id);
-                                          }}
-                                          className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs shadow-md shadow-gray-900/10 hover:shadow-lg focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none rounded bg-[#fff] text-red-600"
-                                          type="button">
-                                          <span
-                                            className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"><i
-                                            className="text-lg fa-solid fa-close"
-                                            aria-hidden="true"></i></span></button>
-                                        {/* Other buttons from original code can be added here if needed */}
-                                      </div>
-                                    </PopoverContent>
-                                  </Popover>
-                                )}
+                                  {(() => {
+                                    const userRole = JSON.parse(localStorage.getItem('mediar')).user.role;
+                                    const currentItem = sortedConciliationList[index];
+                                    
+                                      return (
+                                        <Popover placement="top-end">
+                                          <PopoverHandler>
+                                            <button
+                                              className="relative align-middle select-none font-sans font-medium text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none w-10 max-w-[40px] h-10 max-h-[40px] text-xs text-gray-900 hover:bg-gray-900/10 active:bg-gray-900/20 rounded-full"
+                                              type="button">
+                                              <span className="absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+                                                <i className="fas fa-regular fa-ellipsis-vertical" aria-hidden="true"></i>
+                                              </span>
+                                            </button>
+                                          </PopoverHandler>
+                                          <PopoverContent>
+                                            <div className="flex items-center gap-4">
+                                              {renderActionButtons(userRole, status, currentItem)}
+                                            </div>
+                                          </PopoverContent>
+                                        </Popover>
+                                      );
+                                  })()}
                                 </div>
                               </td>
                             </tr>
@@ -696,6 +741,370 @@ function ProximasMediacoes() {
           </Card>
         </Card>
       )}
+
+      {/* Details Modal */}
+      <Dialog open={showDetailsModal} handler={() => setShowDetailsModal(false)} size="lg">
+        <DialogHeader>Detalhes da Mediação</DialogHeader>
+        <DialogBody className="max-h-[70vh] overflow-y-auto">
+          {selectedConciliation && (
+            <div className="space-y-6">
+              {/* Header Section */}
+              <Card style={{boxShadow: 'none'}}>
+                <CardBody className="text-center py-6">
+                  <Typography variant="h4" color="blue-gray" className="mb-2">
+                    {JSON.parse(localStorage.getItem('mediar')).user.role === 'empresa' ? 'Mediação Criada' : 'Mediação Agendada'}
+                  </Typography>
+                  <Typography variant="h6" color="gray" className="mb-4">
+                    {formatDate(selectedConciliation?.dataMediacao)} {selectedConciliation?.horario && `às ${selectedConciliation?.horario}`}
+                  </Typography>
+                  <Typography variant="small" color="gray">
+                    Status: <span className={`font-semibold ${
+                      selectedConciliation?.status === 'agendada' ? 'text-green-600' :
+                      selectedConciliation?.status === 'aguardando' ? 'text-yellow-600' :
+                      selectedConciliation?.status === 'concluida' ? 'text-blue-600' :
+                      'text-red-600'
+                    }`}>
+                      {selectedConciliation?.status || 'Aguardando'}
+                    </span>
+                  </Typography>
+                </CardBody>
+              </Card>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Company Information - only show if criadoPor exists */}
+                {selectedConciliation?.criadoPor && (
+                  <Card style={{boxShadow: 'none'}}>
+                    <CardHeader color="white" className="relative h-16" style={{borderRadius: 0}}>
+                      <Typography variant="h6" color="blue-gray" className="p-4">
+                        Informações da Empresa
+                      </Typography>
+                    </CardHeader>
+                    <CardBody>
+                      <div className="space-y-3">
+                        {selectedConciliation?.criadoPor?.fullname && (
+                          <div>
+                            <Typography variant="small" color="gray" className="font-semibold">
+                              Nome:
+                            </Typography>
+                            <Typography variant="small" color="blue-gray">
+                              {selectedConciliation.criadoPor.fullname}
+                            </Typography>
+                          </div>
+                        )}
+                        {selectedConciliation?.criadoPor?.email && (
+                          <div>
+                            <Typography variant="small" color="gray" className="font-semibold">
+                              Email:
+                            </Typography>
+                            <Typography variant="small" color="blue-gray">
+                              {selectedConciliation.criadoPor.email}
+                            </Typography>
+                          </div>
+                        )}
+                        {selectedConciliation?.criadoPor?.telefone && (
+                          <div>
+                            <Typography variant="small" color="gray" className="font-semibold">
+                              Telefone:
+                            </Typography>
+                            <Typography variant="small" color="blue-gray">
+                              {selectedConciliation.criadoPor.telefone}
+                            </Typography>
+                          </div>
+                        )}
+                        {selectedConciliation?.criadoPor?.cpfCnpj && (
+                          <div>
+                            <Typography variant="small" color="gray" className="font-semibold">
+                              CPF/CNPJ:
+                            </Typography>
+                            <Typography variant="small" color="blue-gray">
+                              {selectedConciliation.criadoPor.cpfCnpj}
+                            </Typography>
+                          </div>
+                        )}
+                      </div>
+                    </CardBody>
+                  </Card>
+                )}
+
+                {/* Mediator Information - only show if mediador exists and has data */}
+                {selectedConciliation?.mediador && (selectedConciliation.mediador.fullname || selectedConciliation.mediador.email) && (
+                  <Card style={{boxShadow: 'none'}}>
+                    <CardHeader color="white" className="relative h-16" style={{borderRadius: 0}}>
+                      <Typography variant="h6" color="blue-gray" className="p-4">
+                        Mediador Escolhido
+                      </Typography>
+                    </CardHeader>
+                    <CardBody>
+                      <div className="flex items-center gap-4 mb-4">
+                        <Avatar
+                          src="/img/andrea-lista.png"
+                          alt={selectedConciliation?.mediador?.fullname}
+                          size="xl"
+                          className="rounded-full"
+                        />
+                        <div>
+                          {selectedConciliation?.mediador?.fullname && (
+                            <Typography variant="h6" color="blue-gray">
+                              {selectedConciliation.mediador.fullname}
+                            </Typography>
+                          )}
+                          {selectedConciliation?.mediador?.email && (
+                            <Typography variant="small" color="gray">
+                              {selectedConciliation.mediador.email}
+                            </Typography>
+                          )}
+                          {selectedConciliation?.mediador?.telefone && (
+                            <Typography variant="small" color="gray">
+                              Telefone: {selectedConciliation.mediador.telefone}
+                            </Typography>
+                          )}
+                        </div>
+                      </div>
+                    </CardBody>
+                  </Card>
+                )}
+
+                {/* Client Information - only show if client data exists */}
+                {(selectedConciliation?.nome_cliente || selectedConciliation?.mediando || selectedConciliation?.email_cliente) && (
+                  <Card style={{boxShadow: 'none'}}>
+                    <CardHeader color="white" className="relative h-16" style={{borderRadius: 0}}>
+                      <Typography variant="h6" color="blue-gray" className="p-4">
+                        Informações do Cliente
+                      </Typography>
+                    </CardHeader>
+                    <CardBody>
+                      <div className="space-y-3">
+                        {(selectedConciliation?.nome_cliente || selectedConciliation?.mediando) && (
+                          <div>
+                            <Typography variant="small" color="gray" className="font-semibold">
+                              Nome:
+                            </Typography>
+                            <Typography variant="small" color="blue-gray">
+                              {selectedConciliation?.nome_cliente || selectedConciliation?.mediando}
+                            </Typography>
+                          </div>
+                        )}
+                        {selectedConciliation?.email_cliente && (
+                          <div>
+                            <Typography variant="small" color="gray" className="font-semibold">
+                              Email:
+                            </Typography>
+                            <Typography variant="small" color="blue-gray">
+                              {selectedConciliation.email_cliente}
+                            </Typography>
+                          </div>
+                        )}
+                        {selectedConciliation?.telefone_cliente && (
+                          <div>
+                            <Typography variant="small" color="gray" className="font-semibold">
+                              Telefone:
+                            </Typography>
+                            <Typography variant="small" color="blue-gray">
+                              {selectedConciliation.telefone_cliente}
+                            </Typography>
+                          </div>
+                        )}
+                        {selectedConciliation?.cpf_cliente && (
+                          <div>
+                            <Typography variant="small" color="gray" className="font-semibold">
+                              CPF:
+                            </Typography>
+                            <Typography variant="small" color="blue-gray">
+                              {selectedConciliation.cpf_cliente}
+                            </Typography>
+                          </div>
+                        )}
+                      </div>
+                    </CardBody>
+                  </Card>
+                )}
+
+                {/* Process Information - only show if process data exists */}
+                {(selectedConciliation?.numero_processo || selectedConciliation?.numeroProcesso || selectedConciliation?.objeto_disputa || selectedConciliation?.resumo_disputa) && (
+                  <Card style={{boxShadow: 'none'}}>
+                    <CardHeader color="white" className="relative h-16" style={{borderRadius: 0}}>
+                      <Typography variant="h6" color="blue-gray" className="p-4">
+                        Informações do Processo
+                      </Typography>
+                    </CardHeader>
+                    <CardBody>
+                      <div className="space-y-3">
+                        {(selectedConciliation?.numero_processo || selectedConciliation?.numeroProcesso) && (
+                          <div>
+                            <Typography variant="small" color="gray" className="font-semibold">
+                              Número do Processo:
+                            </Typography>
+                            <Typography variant="small" color="blue-gray">
+                              {selectedConciliation?.numero_processo || selectedConciliation?.numeroProcesso}
+                            </Typography>
+                          </div>
+                        )}
+                        {selectedConciliation?.objeto_disputa && (
+                          <div>
+                            <Typography variant="small" color="gray" className="font-semibold">
+                              Objeto da Disputa:
+                            </Typography>
+                            <Typography variant="small" color="blue-gray">
+                              {selectedConciliation.objeto_disputa}
+                            </Typography>
+                          </div>
+                        )}
+                        {selectedConciliation?.resumo_disputa && (
+                          <div>
+                            <Typography variant="small" color="gray" className="font-semibold">
+                              Resumo da Disputa:
+                            </Typography>
+                            <Typography variant="small" color="blue-gray">
+                              {selectedConciliation.resumo_disputa}
+                            </Typography>
+                          </div>
+                        )}
+                        {selectedConciliation?.observacao_cliente && (
+                          <div>
+                            <Typography variant="small" color="gray" className="font-semibold">
+                              Observações:
+                            </Typography>
+                            <Typography variant="small" color="blue-gray">
+                              {selectedConciliation.observacao_cliente}
+                            </Typography>
+                          </div>
+                        )}
+                      </div>
+                    </CardBody>
+                  </Card>
+                )}
+
+                {/* Financial Information - only show if financial data exists */}
+                {(selectedConciliation?.valor_causa || selectedConciliation?.valorCausa || selectedConciliation?.valor_proposta || selectedConciliation?.valorMediacao) && (
+                  <Card style={{boxShadow: 'none'}}>
+                    <CardHeader color="white" className="relative h-16" style={{borderRadius: 0}}>
+                      <Typography variant="h6" color="blue-gray" className="p-4">
+                        Informações Financeiras
+                      </Typography>
+                    </CardHeader>
+                    <CardBody>
+                      <div className="space-y-3">
+                        {(selectedConciliation?.valor_causa || selectedConciliation?.valorCausa) && (
+                          <div>
+                            <Typography variant="small" color="gray" className="font-semibold">
+                              Valor da Causa:
+                            </Typography>
+                            <Typography variant="small" color="blue-gray">
+                              {formatCurrency(selectedConciliation?.valor_causa || selectedConciliation?.valorCausa)}
+                            </Typography>
+                          </div>
+                        )}
+                        {selectedConciliation?.valor_proposta && (
+                          <div>
+                            <Typography variant="small" color="gray" className="font-semibold">
+                              Valor da Proposta:
+                            </Typography>
+                            <Typography variant="small" color="blue-gray">
+                              {formatCurrency(selectedConciliation.valor_proposta)}
+                            </Typography>
+                          </div>
+                        )}
+                        {selectedConciliation?.valorMediacao && (
+                          <div>
+                            <Typography variant="small" color="gray" className="font-semibold">
+                              Valor da Mediação:
+                            </Typography>
+                            <Typography variant="small" color="blue-gray">
+                              {formatCurrency(selectedConciliation.valorMediacao)}
+                            </Typography>
+                          </div>
+                        )}
+                        {selectedConciliation?.validade_proposta && (
+                          <div>
+                            <Typography variant="small" color="gray" className="font-semibold">
+                              Validade da Proposta:
+                            </Typography>
+                            <Typography variant="small" color="blue-gray">
+                              {formatDate(selectedConciliation.validade_proposta)}
+                            </Typography>
+                          </div>
+                        )}
+                      </div>
+                    </CardBody>
+                  </Card>
+                )}
+
+                {/* Virtual Meeting Information - only if reuniao data exists and status is agendada */}
+                {selectedConciliation?.reuniao && selectedConciliation?.status === 'agendada' && (
+                  <Card style={{boxShadow: 'none'}}>
+                    <CardHeader color="white" className="relative h-16" style={{borderRadius: 0}}>
+                      <Typography variant="h6" color="blue-gray" className="p-4">
+                        Reunião Virtual
+                      </Typography>
+                    </CardHeader>
+                    <CardBody>
+                      <div className="space-y-3">
+                        {selectedConciliation?.reuniao?.roomName && (
+                          <div>
+                            <Typography variant="small" color="gray" className="font-semibold">
+                              Sala:
+                            </Typography>
+                            <Typography variant="small" color="blue-gray">
+                              {selectedConciliation.reuniao.roomName}
+                            </Typography>
+                          </div>
+                        )}
+                        {selectedConciliation?.reuniao?.roomUrl && (
+                          <div>
+                            <Typography variant="small" color="gray" className="font-semibold">
+                              Link da Reunião:
+                            </Typography>
+                            <Typography variant="small" color="blue-gray">
+                              <a href={selectedConciliation.reuniao.roomUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                {selectedConciliation.reuniao.roomUrl}
+                              </a>
+                            </Typography>
+                          </div>
+                        )}
+                        {selectedConciliation?.reuniao?.meetingId && (
+                          <div>
+                            <Typography variant="small" color="gray" className="font-semibold">
+                              ID da Reunião:
+                            </Typography>
+                            <Typography variant="small" color="blue-gray">
+                              {selectedConciliation.reuniao.meetingId}
+                            </Typography>
+                          </div>
+                        )}
+                        {selectedConciliation?.reuniao?.startDate && (
+                          <div>
+                            <Typography variant="small" color="gray" className="font-semibold">
+                              Data/Hora de Início:
+                            </Typography>
+                            <Typography variant="small" color="blue-gray">
+                              {formatDateTime(selectedConciliation.reuniao.startDate)}
+                            </Typography>
+                          </div>
+                        )}
+                        {selectedConciliation?.reuniao?.endDate && (
+                          <div>
+                            <Typography variant="small" color="gray" className="font-semibold">
+                              Data/Hora de Término:
+                            </Typography>
+                            <Typography variant="small" color="blue-gray">
+                              {formatDateTime(selectedConciliation.reuniao.endDate)}
+                            </Typography>
+                          </div>
+                        )}
+                      </div>
+                    </CardBody>
+                  </Card>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="text" color="red" onClick={() => setShowDetailsModal(false)} className="mr-1">
+            <span>Fechar</span>
+          </Button>
+        </DialogFooter>
+      </Dialog>
     </>
   )
 }
